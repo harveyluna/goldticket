@@ -214,6 +214,9 @@
       object-position: center top;
       display: block;
     }
+    .nominee-avatar img.poster {
+      object-position: center center;
+    }
     .nominee-row.selected .nominee-avatar { background: #3a3020; color: #D4A843; }
     .nominee-row.selected .nominee-avatar img { outline: 2px solid #D4A843; border-radius: 50%; }
 
@@ -284,115 +287,115 @@ const CATEGORIES = [
     id: 'best_picture',
     name: 'Best Picture',
     nominees: [
-      { name: 'Anora', detail: '' },
-      { name: 'The Brutalist', detail: '' },
-      { name: 'A Complete Unknown', detail: '' },
-      { name: 'Conclave', detail: '' },
-      { name: 'Dune: Part Two', detail: '' },
-      { name: 'Emilia Pérez', detail: '' },
-      { name: "I'm Still Here", detail: '' },
-      { name: 'Nickel Boys', detail: '' },
-      { name: 'The Substance', detail: '' },
-      { name: 'Wicked', detail: '' },
+      { name: 'Bugonia',                  detail: '', photo: '', photoType: 'poster' },
+      { name: 'F1',                       detail: '', photo: '', photoType: 'poster' },
+      { name: 'Frankenstein',             detail: '', photo: '', photoType: 'poster' },
+      { name: 'Hamnet',                   detail: '', photo: '', photoType: 'poster' },
+      { name: 'Marty Supreme',            detail: '', photo: '', photoType: 'poster' },
+      { name: 'One Battle After Another', detail: '', photo: '', photoType: 'poster' },
+      { name: 'The Secret Agent',         detail: '', photo: '', photoType: 'poster' },
+      { name: 'Sentimental Value',        detail: '', photo: '', photoType: 'poster' },
+      { name: 'Sinners',                  detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/8/8d/Sinners_2025_film_poster.jpg', photoType: 'poster' },
+      { name: 'Train Dreams',             detail: '', photo: '', photoType: 'poster' },
     ],
   },
   {
     id: 'best_director',
     name: 'Best Director',
     nominees: [
-      { name: 'Sean Baker', detail: 'Anora', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Sean_Baker_at_the_2024_Toronto_International_Film_Festival_2_%28cropped%29.jpg/250px-Sean_Baker_at_the_2024_Toronto_International_Film_Festival_2_%28cropped%29.jpg' },
-      { name: 'Brady Corbet', detail: 'The Brutalist', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Brady_Corbet_at_Berlinale_2024.jpg/250px-Brady_Corbet_at_Berlinale_2024.jpg' },
-      { name: 'James Mangold', detail: 'A Complete Unknown', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/James_Mangold_Press_Conference_Logan_Berlinale_2017_03.jpg/250px-James_Mangold_Press_Conference_Logan_Berlinale_2017_03.jpg' },
-      { name: 'Jacques Audiard', detail: 'Emilia Pérez', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Jacques_Audiard_Cannes_2017.jpg/250px-Jacques_Audiard_Cannes_2017.jpg' },
-      { name: 'Coralie Fargeat', detail: 'The Substance', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Coralie_Fargeat-2207.jpg/250px-Coralie_Fargeat-2207.jpg' },
+      { name: 'Chloé Zhao',           detail: 'Hamnet',                   photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Chloe_Zhao_at_Tribeca_2013_%28cropped%29.jpg/330px-Chloe_Zhao_at_Tribeca_2013_%28cropped%29.jpg' },
+      { name: 'Josh Safdie',          detail: 'Marty Supreme',            photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Josh_Safdie_2019_%28cropped%29.jpg/330px-Josh_Safdie_2019_%28cropped%29.jpg' },
+      { name: 'Paul Thomas Anderson', detail: 'One Battle After Another', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Paul_Thomas_Anderson_2012_%28cropped%29.jpg/330px-Paul_Thomas_Anderson_2012_%28cropped%29.jpg' },
+      { name: 'Joachim Trier',        detail: 'Sentimental Value',        photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Joachim_Trier_2021_%28cropped%29.jpg/330px-Joachim_Trier_2021_%28cropped%29.jpg' },
+      { name: 'Ryan Coogler',         detail: 'Sinners',                  photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Ryan_Coogler_by_Gage_Skidmore.jpg/330px-Ryan_Coogler_by_Gage_Skidmore.jpg' },
     ],
   },
   {
     id: 'best_actor',
     name: 'Best Actor',
     nominees: [
-      { name: 'Adrien Brody', detail: 'The Brutalist' },
-      { name: 'Timothée Chalamet', detail: 'A Complete Unknown' },
-      { name: 'Colman Domingo', detail: 'Sing Sing' },
-      { name: 'Ralph Fiennes', detail: 'Conclave' },
-      { name: 'Sebastian Stan', detail: 'The Apprentice' },
+      { name: 'Timothée Chalamet', detail: 'Marty Supreme',            photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Timoth%C3%A9e_Chalamet-63482_%28cropped%29.jpg/330px-Timoth%C3%A9e_Chalamet-63482_%28cropped%29.jpg' },
+      { name: 'Leonardo DiCaprio', detail: 'One Battle After Another', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Leonardo_DiCaprio_2024.jpg/330px-Leonardo_DiCaprio_2024.jpg' },
+      { name: 'Ethan Hawke',       detail: 'Blue Moon',                photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Ethan_Hawke_2018_%28cropped%29.jpg/330px-Ethan_Hawke_2018_%28cropped%29.jpg' },
+      { name: 'Michael B. Jordan', detail: 'Sinners',                  photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Michael_B._Jordan_2019_by_Gage_Skidmore.jpg/330px-Michael_B._Jordan_2019_by_Gage_Skidmore.jpg' },
+      { name: 'Wagner Moura',      detail: 'The Secret Agent',         photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Wagner_Moura_at_the_2018_Toronto_International_Film_Festival_%28cropped%29.jpg/330px-Wagner_Moura_at_the_2018_Toronto_International_Film_Festival_%28cropped%29.jpg' },
     ],
   },
   {
     id: 'best_actress',
     name: 'Best Actress',
     nominees: [
-      { name: 'Cynthia Erivo', detail: 'Wicked' },
-      { name: 'Karla Sofía Gascón', detail: 'Emilia Pérez' },
-      { name: 'Mikey Madison', detail: 'Anora' },
-      { name: 'Demi Moore', detail: 'The Substance' },
-      { name: 'Fernanda Torres', detail: "I'm Still Here" },
+      { name: 'Jessie Buckley',   detail: 'Hamnet',                    photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Jessie_Buckley_TIFF_2023_%28cropped%29.jpg/330px-Jessie_Buckley_TIFF_2023_%28cropped%29.jpg' },
+      { name: 'Rose Byrne',       detail: 'If I Had Legs I\'d Kick You', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Rose_Byrne_2014_%28cropped%29.jpg/330px-Rose_Byrne_2014_%28cropped%29.jpg' },
+      { name: 'Kate Hudson',      detail: 'Song Sung Blue',            photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Kate_Hudson_2016_%28cropped%29.jpg/330px-Kate_Hudson_2016_%28cropped%29.jpg' },
+      { name: 'Renate Reinsve',   detail: 'Sentimental Value',         photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Renate_Reinsve_2021_%28cropped%29.jpg/330px-Renate_Reinsve_2021_%28cropped%29.jpg' },
+      { name: 'Emma Stone',       detail: 'Bugonia',                   photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Emma_Stone_at_the_2024_Cannes_Film_Festival_%28cropped%29.jpg/330px-Emma_Stone_at_the_2024_Cannes_Film_Festival_%28cropped%29.jpg' },
     ],
   },
   {
     id: 'best_supporting_actor',
     name: 'Best Supporting Actor',
     nominees: [
-      { name: 'Yura Borisov', detail: 'Anora' },
-      { name: 'Kieran Culkin', detail: 'A Real Pain' },
-      { name: 'Jeremy Strong', detail: 'The Apprentice' },
-      { name: 'Zach Galifianakis', detail: 'A Real Pain' },
-      { name: 'Edward Norton', detail: 'A Complete Unknown' },
+      { name: 'Jacob Elordi',      detail: 'Frankenstein',             photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Jacob_Elordi_2023_%28cropped%29.jpg/330px-Jacob_Elordi_2023_%28cropped%29.jpg' },
+      { name: 'Sean Penn',         detail: 'One Battle After Another', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Sean_Penn_2016_%28cropped%29.jpg/330px-Sean_Penn_2016_%28cropped%29.jpg' },
+      { name: 'Benicio Del Toro',  detail: 'One Battle After Another', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Benicio_Del_Toro_2024_%28cropped%29.jpg/330px-Benicio_Del_Toro_2024_%28cropped%29.jpg' },
+      { name: 'Stellan Skarsgård', detail: 'Sentimental Value',        photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Stellan_Skarsg%C3%A5rd_2014_%28cropped%29.jpg/330px-Stellan_Skarsg%C3%A5rd_2014_%28cropped%29.jpg' },
+      { name: 'Delroy Lindo',      detail: 'Sinners',                  photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Delroy_Lindo_2018_%28cropped%29.jpg/330px-Delroy_Lindo_2018_%28cropped%29.jpg' },
     ],
   },
   {
     id: 'best_supporting_actress',
     name: 'Best Supporting Actress',
     nominees: [
-      { name: 'Monica Barbaro', detail: 'A Complete Unknown' },
-      { name: 'Ariana Grande', detail: 'Wicked' },
-      { name: 'Felicity Jones', detail: 'The Brutalist' },
-      { name: 'Isabella Rossellini', detail: 'Conclave' },
-      { name: 'Zoe Saldana', detail: 'Emilia Pérez' },
+      { name: 'Elle Fanning',              detail: 'Sentimental Value',        photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Elle_Fanning_2023_%28cropped%29.jpg/330px-Elle_Fanning_2023_%28cropped%29.jpg' },
+      { name: 'Inga Ibsdotter Lilleaas',   detail: 'Sentimental Value',        photo: '' },
+      { name: 'Amy Madigan',               detail: 'Weapons',                  photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Amy_Madigan_%28cropped%29.jpg/330px-Amy_Madigan_%28cropped%29.jpg' },
+      { name: 'Wunmi Mosaku',              detail: 'Sinners',                  photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Wunmi_Mosaku_2019_%28cropped%29.jpg/330px-Wunmi_Mosaku_2019_%28cropped%29.jpg' },
+      { name: 'Teyana Taylor',             detail: 'One Battle After Another', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Teyana_Taylor_2022_%28cropped%29.jpg/330px-Teyana_Taylor_2022_%28cropped%29.jpg' },
     ],
   },
   {
     id: 'best_adapted_screenplay',
     name: 'Best Adapted Screenplay',
     nominees: [
-      { name: 'A Complete Unknown', detail: 'James Mangold & Jay Cocks' },
-      { name: 'Conclave', detail: 'Edward Berger' },
-      { name: 'Emilia Pérez', detail: 'Jacques Audiard' },
-      { name: 'Nickel Boys', detail: 'RaMell Ross' },
-      { name: 'Sing Sing', detail: 'Greg Kwedar & Clint Bentley' },
+      { name: 'Bugonia',                  detail: 'Will Tracy',                         photo: '', photoType: 'poster' },
+      { name: 'Frankenstein',             detail: 'Guillermo del Toro',                 photo: '', photoType: 'poster' },
+      { name: 'Hamnet',                   detail: 'Chloé Zhao & Maggie O\'Farrell',     photo: '', photoType: 'poster' },
+      { name: 'One Battle After Another', detail: 'Paul Thomas Anderson',               photo: '', photoType: 'poster' },
+      { name: 'Train Dreams',             detail: 'Clint Bentley & Greg Kwedar',        photo: '', photoType: 'poster' },
     ],
   },
   {
     id: 'best_original_screenplay',
     name: 'Best Original Screenplay',
     nominees: [
-      { name: 'Anora', detail: 'Sean Baker' },
-      { name: 'The Brutalist', detail: 'Brady Corbet & Mona Fastvold' },
-      { name: 'A Real Pain', detail: 'Jesse Eisenberg' },
-      { name: 'September 5', detail: 'Moritz Binder, Tim Fehlbaum & Alex David' },
-      { name: 'The Substance', detail: 'Coralie Fargeat' },
+      { name: 'Sinners',                  detail: 'Ryan Coogler',              photo: 'https://upload.wikimedia.org/wikipedia/en/8/8d/Sinners_2025_film_poster.jpg', photoType: 'poster' },
+      { name: 'It Was Just an Accident',  detail: 'Jafar Panahi',              photo: '', photoType: 'poster' },
+      { name: 'Marty Supreme',            detail: 'Josh Safdie',               photo: '', photoType: 'poster' },
+      { name: 'Sentimental Value',        detail: 'Joachim Trier & Eskil Vogt', photo: '', photoType: 'poster' },
+      { name: 'Blue Moon',                detail: 'Richard Tanne',             photo: '', photoType: 'poster' },
     ],
   },
   {
     id: 'best_animated_feature',
     name: 'Best Animated Feature',
     nominees: [
-      { name: 'Flow', detail: '' },
-      { name: 'Inside Out 2', detail: '' },
-      { name: 'Memoir of a Snail', detail: '' },
-      { name: 'Wallace & Gromit: Vengeance Most Fowl', detail: '' },
-      { name: 'The Wild Robot', detail: '' },
+      { name: 'Arco',                              detail: '', photo: '', photoType: 'poster' },
+      { name: 'Elio',                              detail: '', photo: '', photoType: 'poster' },
+      { name: 'KPop Demon Hunters',                detail: '', photo: '', photoType: 'poster' },
+      { name: 'Little Amélie or the Character of Rain', detail: '', photo: '', photoType: 'poster' },
+      { name: 'Zootopia 2',                        detail: '', photo: '', photoType: 'poster' },
     ],
   },
   {
     id: 'best_international_feature',
     name: 'Best International Feature Film',
     nominees: [
-      { name: 'The Girl with the Needle', detail: 'Denmark' },
-      { name: "I'm Still Here", detail: 'Brazil' },
-      { name: 'The Seed of the Sacred Fig', detail: 'Germany' },
-      { name: 'Emilia Pérez', detail: 'France' },
-      { name: 'Flow', detail: 'Latvia' },
+      { name: 'It Was Just an Accident', detail: 'France',   photo: '', photoType: 'poster' },
+      { name: 'The Secret Agent',        detail: 'Brazil',   photo: '', photoType: 'poster' },
+      { name: 'Sentimental Value',       detail: 'Norway',   photo: '', photoType: 'poster' },
+      { name: 'Sirāt',                   detail: 'Spain',    photo: '', photoType: 'poster' },
+      { name: 'The Voice of Hind Rajab', detail: 'Tunisia',  photo: '', photoType: 'poster' },
     ],
   },
 ];
@@ -469,7 +472,7 @@ function HomePage({ picks, onSelect }) {
     <div className="home">
       <div className="badge">
         <TrophyIcon color="#D4A843"/>
-        97TH ACADEMY AWARDS
+        98TH ACADEMY AWARDS
       </div>
 
       <h1>Oscar<br/>Predictions</h1>
@@ -564,7 +567,12 @@ function CategoryPage({ categoryId, picks, onPick, onBack }) {
             >
               <div className="nominee-avatar">
                 {n.photo
-                  ? <img src={n.photo} alt={n.name} onError={e => { e.target.style.display='none'; e.target.parentNode.textContent = initials(n.name); }}/>
+                  ? <img
+                      src={n.photo}
+                      alt={n.name}
+                      className={n.photoType === 'poster' ? 'poster' : ''}
+                      onError={e => { e.target.style.display='none'; e.target.parentNode.textContent = initials(n.name); }}
+                    />
                   : initials(n.name)
                 }
               </div>
