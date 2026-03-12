@@ -16,7 +16,7 @@ A sleek dark-themed Oscar predictions app for the **97th Academy Awards**. Pick 
 2. Under **Source**, select `main` branch and `/ (root)` folder
 3. Click **Save**
 
-Your site will be live at:
+Site is live at:
 ```
 https://harveyluna.github.io/goldticket/
 ```
@@ -24,7 +24,3 @@ https://harveyluna.github.io/goldticket/
 ## Local preview
 
 Just open `index.html` in any browser — no server needed.
-
----
-
-Built from [Base44](https://base44.com) · 97th Academy Awards (2025)
