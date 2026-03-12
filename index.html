@@ -7,6 +7,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -280,7 +281,24 @@
 <div id="root"></div>
 
 <script type="text/babel">
-const { useState, useEffect } = React;
+const { useState, useEffect, useRef } = React;
+
+/* ─────────────────────────────────────────────
+   SUPABASE
+───────────────────────────────────────────── */
+const supabase = window.supabase.createClient(
+  'https://ysihesgalkgyrbqysrtp.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzaWhlc2dhbGtneXJicXlzcnRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyODI0MTAsImV4cCI6MjA4ODg1ODQxMH0.VAJhU4WgBYJS-5Jz_81QcH_FU_LPKyCnyxWIUBTcxqY'
+);
+
+function getSessionId() {
+  let id = localStorage.getItem('goldticket_session');
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem('goldticket_session', id);
+  }
+  return id;
+}
 
 /* ─────────────────────────────────────────────
    DATA
@@ -734,9 +752,35 @@ function App() {
     } catch { return {}; }
   });
   const [activeCat, setActiveCat] = useState(null);
+  const sessionId = useRef(getSessionId());
+  const saveTimeout = useRef(null);
 
+  // Load picks from Supabase on mount
+  useEffect(() => {
+    supabase
+      .from('picks')
+      .select('picks')
+      .eq('session_id', sessionId.current)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.picks && Object.keys(data.picks).length > 0) {
+          setPicks(data.picks);
+          localStorage.setItem('goldticket_picks', JSON.stringify(data.picks));
+        }
+      });
+  }, []);
+
+  // Sync picks to localStorage + Supabase (debounced)
   useEffect(() => {
     localStorage.setItem('goldticket_picks', JSON.stringify(picks));
+    clearTimeout(saveTimeout.current);
+    saveTimeout.current = setTimeout(() => {
+      supabase.from('picks').upsert({
+        session_id: sessionId.current,
+        picks,
+        updated_at: new Date().toISOString(),
+      });
+    }, 600);
   }, [picks]);
 
   const handlePick = (catId, nominee) => {
