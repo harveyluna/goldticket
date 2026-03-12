@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CultureBrackets - Oscar Predictions</title>
+  <title>GoldTicket – Oscar Predictions</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
@@ -86,142 +86,63 @@
     /* ── Grid ── */
     .categories-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 12px;
       text-align: left;
     }
 
     /* ── Category card ── */
     .cat-card {
-      background: linear-gradient(180deg, #1d1d1d 0%, #171717 100%);
+      background: #1c1c1c;
       border: 1px solid #2a2a2a;
-      border-radius: 18px;
-      padding: 16px;
+      border-radius: 14px;
+      padding: 18px 20px;
       cursor: pointer;
-      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+      transition: border-color 0.15s, background 0.15s;
       display: flex;
-      align-items: center;
-      gap: 16px;
-      min-height: 132px;
+      align-items: flex-start;
+      gap: 14px;
     }
-
-    .cat-card:hover {
-      border-color: #5a4a22;
-      background: linear-gradient(180deg, #222222 0%, #1a1a1a 100%);
-      transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.28);
-    }
-
-    .cat-card.picked {
-      border-color: #6f5720;
-      background: linear-gradient(180deg, #211d14 0%, #181611 100%);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.24);
-    }
+    .cat-card:hover { border-color: #444; background: #222; }
+    .cat-card.picked { border-color: #3a3020; background: #1e1c14; }
 
     .cat-icon {
-      width: 100px;
-      height: 100px;
-      min-width: 100px;
-      min-height: 100px;
-      border-radius: 14px;
-      background: #252525;
-      overflow: hidden;
-      flex-shrink: 0;
-      position: relative;
-      border: 1px solid #2f2f2f;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 100px; height: 100px; min-width: 100px; min-height: 100px;
+      border-radius: 14px; background: #252525; overflow: hidden; flex-shrink: 0;
+      position: relative; border: 1px solid #2f2f2f;
+      display: flex; align-items: center; justify-content: center;
     }
-
-    .cat-card.picked .cat-icon {
-      border-color: #6f5720;
-      background: #2a2417;
-    }
-
+    .cat-icon svg { width: 28px; height: 28px; position: relative; z-index: 0; }
     .cat-icon img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
+      position: absolute; inset: 0;
+      width: 100%; height: 100%; object-fit: cover; display: block;
+      z-index: 1;
     }
 
-    .cat-icon::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.22) 100%);
-      pointer-events: none;
-    }
-
-    .cat-body {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-    .cat-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #f3ead7;
-      line-height: 1.2;
-    }
-    .cat-sub {
-      font-size: 0.78rem;
-      color: #7e7e7e;
-      margin-top: 4px;
-    }
-    .cat-pick {
-      margin-top: 10px;
-      font-size: 0.88rem;
-      color: #D4A843;
-      font-weight: 700;
-      line-height: 1.2;
-    }
-    .cat-pick-detail {
-      font-size: 0.76rem;
-      color: #9a9a9a;
-      margin-top: 3px;
-    }
+    .cat-body { flex: 1; min-width: 0; }
+    .cat-title { font-size: 0.95rem; font-weight: 600; color: #e5e5e5; }
+    .cat-sub   { font-size: 0.78rem; color: #666; margin-top: 2px; }
+    .cat-pick  { font-size: 0.82rem; color: #D4A843; margin-top: 6px; font-weight: 600; }
+    .cat-pick-detail { font-size: 0.76rem; color: #888; }
 
     .cat-right {
-      display: flex;
-      align-items: center;
-      align-self: center;
+      display: flex; align-items: center;
       flex-shrink: 0;
     }
-
     .check-circle {
-      width: 28px;
-      height: 28px;
+      width: 22px; height: 22px;
       border-radius: 50%;
       background: #D4A843;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 0 4px rgba(212,168,67,0.12);
+      display: flex; align-items: center; justify-content: center;
     }
-    .check-circle svg {
-      width: 14px;
-      height: 14px;
-    }
-
+    .check-circle svg { width: 13px; height: 13px; }
     .arrow-circle {
-      width: 34px;
-      height: 34px;
+      width: 28px; height: 28px;
       border-radius: 50%;
-      background: #232323;
-      border: 1px solid #303030;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: #252525;
+      display: flex; align-items: center; justify-content: center;
     }
-    .arrow-circle svg {
-      width: 15px;
-      height: 15px;
-      color: #777;
-    }
+    .arrow-circle svg { width: 14px; height: 14px; color: #666; }
 
     /* ── Category detail ── */
     .detail-page {
@@ -280,8 +201,8 @@
     }
 
     .nominee-avatar {
-      width: 44px; height: 44px;
-      border-radius: 50%;
+      width: 100px; height: 100px;
+      border-radius: 8px;
       background: #2a2a2a;
       display: flex; align-items: center; justify-content: center;
       font-size: 0.85rem;
@@ -300,7 +221,7 @@
       object-position: center center;
     }
     .nominee-row.selected .nominee-avatar { background: #3a3020; color: #D4A843; }
-    .nominee-row.selected .nominee-avatar img { outline: 2px solid #D4A843; border-radius: 50%; }
+    .nominee-row.selected .nominee-avatar img { outline: 2px solid #D4A843; border-radius: 8px; }
 
     .nominee-info { flex: 1; min-width: 0; }
     .nominee-name   { font-size: 0.95rem; font-weight: 500; color: #e5e5e5; }
@@ -353,25 +274,6 @@
       transition: background 0.15s;
     }
     .reset-btn:hover { background: #c49530; }
-
-    @media (max-width: 640px) {
-      .categories-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .cat-card {
-        gap: 18px;
-        padding: 20px 22px;
-
-      }
-
-      .cat-icon {
-        width: 88px;
-        height: 88px;
-        min-width: 88px;
-        min-height: 88px;
-      }
-    }
   </style>
 </head>
 <body>
@@ -426,11 +328,11 @@ const CATEGORIES = [
     id: 'best_actress',
     name: 'Best Actress',
     nominees: [
-      { name: 'Jessie Buckley',   detail: 'Hamnet',                      photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Jessie_Buckley_TIFF_2023_%28cropped%29.jpg/330px-Jessie_Buckley_TIFF_2023_%28cropped%29.jpg' },
-      { name: 'Rose Byrne',       detail: "If I Had Legs I'd Kick You",  photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Rose_Byrne_2014_%28cropped%29.jpg/330px-Rose_Byrne_2014_%28cropped%29.jpg' },
-      { name: 'Kate Hudson',      detail: 'Song Sung Blue',              photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Kate_Hudson_2016_%28cropped%29.jpg/330px-Kate_Hudson_2016_%28cropped%29.jpg' },
-      { name: 'Renate Reinsve',   detail: 'Sentimental Value',           photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Renate_Reinsve_2021_%28cropped%29.jpg/330px-Renate_Reinsve_2021_%28cropped%29.jpg' },
-      { name: 'Emma Stone',       detail: 'Bugonia',                     photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Emma_Stone_at_the_2024_Cannes_Film_Festival_%28cropped%29.jpg/330px-Emma_Stone_at_the_2024_Cannes_Film_Festival_%28cropped%29.jpg' },
+      { name: 'Jessie Buckley',   detail: 'Hamnet',                    photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Jessie_Buckley_TIFF_2023_%28cropped%29.jpg/330px-Jessie_Buckley_TIFF_2023_%28cropped%29.jpg' },
+      { name: 'Rose Byrne',       detail: "If I Had Legs I'd Kick You", photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Rose_Byrne_2014_%28cropped%29.jpg/330px-Rose_Byrne_2014_%28cropped%29.jpg' },
+      { name: 'Kate Hudson',      detail: 'Song Sung Blue',            photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Kate_Hudson_2016_%28cropped%29.jpg/330px-Kate_Hudson_2016_%28cropped%29.jpg' },
+      { name: 'Renate Reinsve',   detail: 'Sentimental Value',         photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Renate_Reinsve_2021_%28cropped%29.jpg/330px-Renate_Reinsve_2021_%28cropped%29.jpg' },
+      { name: 'Emma Stone',       detail: 'Bugonia',                   photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Emma_Stone_at_the_2024_Cannes_Film_Festival_%28cropped%29.jpg/330px-Emma_Stone_at_the_2024_Cannes_Film_Festival_%28cropped%29.jpg' },
     ],
   },
   {
@@ -448,44 +350,44 @@ const CATEGORIES = [
     id: 'best_supporting_actress',
     name: 'Best Supporting Actress',
     nominees: [
-      { name: 'Elle Fanning',            detail: 'Sentimental Value',        photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Elle_Fanning_2023_%28cropped%29.jpg/330px-Elle_Fanning_2023_%28cropped%29.jpg' },
-      { name: 'Inga Ibsdotter Lilleaas', detail: 'Sentimental Value',        photo: 'https://upload.wikimedia.org/wikipedia/commons/2/23/Inga_Ibsdotter_Lilleaas-9741.jpg' },
-      { name: 'Amy Madigan',             detail: 'Weapons',                  photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Amy_Madigan_%28cropped%29.jpg/330px-Amy_Madigan_%28cropped%29.jpg' },
-      { name: 'Wunmi Mosaku',            detail: 'Sinners',                  photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Wunmi_Mosaku_2019_%28cropped%29.jpg/330px-Wunmi_Mosaku_2019_%28cropped%29.jpg' },
-      { name: 'Teyana Taylor',           detail: 'One Battle After Another', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Teyana_Taylor_2022_%28cropped%29.jpg/330px-Teyana_Taylor_2022_%28cropped%29.jpg' },
+      { name: 'Elle Fanning',              detail: 'Sentimental Value',        photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Elle_Fanning_2023_%28cropped%29.jpg/330px-Elle_Fanning_2023_%28cropped%29.jpg' },
+      { name: 'Inga Ibsdotter Lilleaas',   detail: 'Sentimental Value',        photo: 'https://upload.wikimedia.org/wikipedia/commons/2/23/Inga_Ibsdotter_Lilleaas-9741.jpg' },
+      { name: 'Amy Madigan',               detail: 'Weapons',                  photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Amy_Madigan_%28cropped%29.jpg/330px-Amy_Madigan_%28cropped%29.jpg' },
+      { name: 'Wunmi Mosaku',              detail: 'Sinners',                  photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Wunmi_Mosaku_2019_%28cropped%29.jpg/330px-Wunmi_Mosaku_2019_%28cropped%29.jpg' },
+      { name: 'Teyana Taylor',             detail: 'One Battle After Another', photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Teyana_Taylor_2022_%28cropped%29.jpg/330px-Teyana_Taylor_2022_%28cropped%29.jpg' },
     ],
   },
   {
     id: 'best_adapted_screenplay',
     name: 'Best Adapted Screenplay',
     nominees: [
-      { name: 'Bugonia',                  detail: 'Will Tracy',                     photo: 'https://upload.wikimedia.org/wikipedia/commons/5/51/BUGONIA_FF_English_US_Poster_1080x1600_Static_V1_%281%29.jpg', photoType: 'poster' },
-      { name: 'Frankenstein',             detail: 'Guillermo del Toro',             photo: 'https://upload.wikimedia.org/wikipedia/en/9/94/Frankenstein_2025_film_poster.jpg', photoType: 'poster' },
-      { name: 'Hamnet',                   detail: "Chloé Zhao & Maggie O'Farrell",  photo: 'https://upload.wikimedia.org/wikipedia/en/1/1f/Hamnet_film_poster.jpeg', photoType: 'poster' },
-      { name: 'One Battle After Another', detail: 'Paul Thomas Anderson',           photo: 'https://upload.wikimedia.org/wikipedia/en/5/5d/One_Battle_After_Another.jpg', photoType: 'poster' },
-      { name: 'Train Dreams',             detail: 'Clint Bentley & Greg Kwedar',    photo: 'https://upload.wikimedia.org/wikipedia/en/5/58/Train_Dreams_poster.jpeg', photoType: 'poster' },
+      { name: 'Bugonia',                  detail: 'Will Tracy',                         photo: 'https://upload.wikimedia.org/wikipedia/commons/5/51/BUGONIA_FF_English_US_Poster_1080x1600_Static_V1_%281%29.jpg', photoType: 'poster' },
+      { name: 'Frankenstein',             detail: 'Guillermo del Toro',                 photo: 'https://upload.wikimedia.org/wikipedia/en/9/94/Frankenstein_2025_film_poster.jpg', photoType: 'poster' },
+      { name: 'Hamnet',                   detail: "Chloé Zhao & Maggie O'Farrell",      photo: 'https://upload.wikimedia.org/wikipedia/en/1/1f/Hamnet_film_poster.jpeg', photoType: 'poster' },
+      { name: 'One Battle After Another', detail: 'Paul Thomas Anderson',               photo: 'https://upload.wikimedia.org/wikipedia/en/5/5d/One_Battle_After_Another.jpg', photoType: 'poster' },
+      { name: 'Train Dreams',             detail: 'Clint Bentley & Greg Kwedar',        photo: 'https://upload.wikimedia.org/wikipedia/en/5/58/Train_Dreams_poster.jpeg', photoType: 'poster' },
     ],
   },
   {
     id: 'best_original_screenplay',
     name: 'Best Original Screenplay',
     nominees: [
-      { name: 'Sinners',                 detail: 'Ryan Coogler',                photo: 'https://upload.wikimedia.org/wikipedia/en/8/8d/Sinners_2025_film_poster.jpg', photoType: 'poster' },
-      { name: 'It Was Just an Accident', detail: 'Jafar Panahi',                photo: 'https://upload.wikimedia.org/wikipedia/en/8/84/Un_Simple_Accident_2025.jpeg', photoType: 'poster' },
-      { name: 'Marty Supreme',           detail: 'Josh Safdie',                 photo: 'https://upload.wikimedia.org/wikipedia/en/b/ba/Marty_Supreme_poster.jpg', photoType: 'poster' },
-      { name: 'Sentimental Value',       detail: 'Joachim Trier & Eskil Vogt',  photo: 'https://upload.wikimedia.org/wikipedia/en/5/5c/Sentimental_Value_2025.jpeg', photoType: 'poster' },
-      { name: 'Blue Moon',               detail: 'Richard Tanne',               photo: 'https://upload.wikimedia.org/wikipedia/en/a/a1/Blue_Moon_poster.jpg', photoType: 'poster' },
+      { name: 'Sinners',                  detail: 'Ryan Coogler',               photo: 'https://upload.wikimedia.org/wikipedia/en/8/8d/Sinners_2025_film_poster.jpg', photoType: 'poster' },
+      { name: 'It Was Just an Accident',  detail: 'Jafar Panahi',               photo: 'https://upload.wikimedia.org/wikipedia/en/8/84/Un_Simple_Accident_2025.jpeg', photoType: 'poster' },
+      { name: 'Marty Supreme',            detail: 'Josh Safdie',                photo: 'https://upload.wikimedia.org/wikipedia/en/b/ba/Marty_Supreme_poster.jpg', photoType: 'poster' },
+      { name: 'Sentimental Value',        detail: 'Joachim Trier & Eskil Vogt', photo: 'https://upload.wikimedia.org/wikipedia/en/5/5c/Sentimental_Value_2025.jpeg', photoType: 'poster' },
+      { name: 'Blue Moon',                detail: 'Richard Tanne',              photo: 'https://upload.wikimedia.org/wikipedia/en/a/a1/Blue_Moon_poster.jpg', photoType: 'poster' },
     ],
   },
   {
     id: 'best_animated_feature',
     name: 'Best Animated Feature',
     nominees: [
-      { name: 'Arco',                                detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/a/ae/Arco_poster.jpg', photoType: 'poster' },
-      { name: 'Elio',                                detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/4/4e/Elio_film_poster.jpg', photoType: 'poster' },
-      { name: 'KPop Demon Hunters',                  detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/9/93/KPDHposter.jpeg', photoType: 'poster' },
-      { name: 'Little Amélie or the Character of Rain', detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/2/2a/Amelie_et_la_metaphysique_des_tubes.jpg', photoType: 'poster' },
-      { name: 'Zootopia 2',                          detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/6/6a/Zootopia_2_%282025_film%29.jpg', photoType: 'poster' },
+      { name: 'Arco',                                    detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/a/ae/Arco_poster.jpg', photoType: 'poster' },
+      { name: 'Elio',                                    detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/4/4e/Elio_film_poster.jpg', photoType: 'poster' },
+      { name: 'KPop Demon Hunters',                      detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/9/93/KPDHposter.jpeg', photoType: 'poster' },
+      { name: 'Little Amélie or the Character of Rain',  detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/2/2a/Amelie_et_la_metaphysique_des_tubes.jpg', photoType: 'poster' },
+      { name: 'Zootopia 2',                              detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/6/6a/Zootopia_2_%282025_film%29.jpg', photoType: 'poster' },
     ],
   },
   {
@@ -497,6 +399,127 @@ const CATEGORIES = [
       { name: 'Sentimental Value',       detail: 'Norway',  photo: 'https://upload.wikimedia.org/wikipedia/en/5/5c/Sentimental_Value_2025.jpeg', photoType: 'poster' },
       { name: 'Sirāt',                   detail: 'Spain',   photo: 'https://upload.wikimedia.org/wikipedia/en/9/91/Sirat_2025.jpeg', photoType: 'poster' },
       { name: 'The Voice of Hind Rajab', detail: 'Tunisia', photo: 'https://upload.wikimedia.org/wikipedia/en/b/b5/The_Voice_of_Hind_Rajab_film_poster.jpg', photoType: 'poster' },
+    ],
+  },
+  {
+    id: 'best_cinematography',
+    name: 'Best Cinematography',
+    nominees: [
+      { name: 'Frankenstein',             detail: 'Dan Laustsen',           photo: 'https://upload.wikimedia.org/wikipedia/en/9/94/Frankenstein_2025_film_poster.jpg', photoType: 'poster' },
+      { name: 'Marty Supreme',            detail: 'Darius Khondji',          photo: 'https://upload.wikimedia.org/wikipedia/en/b/ba/Marty_Supreme_poster.jpg', photoType: 'poster' },
+      { name: 'One Battle After Another', detail: 'Michael Bauman',          photo: 'https://upload.wikimedia.org/wikipedia/en/5/5d/One_Battle_After_Another.jpg', photoType: 'poster' },
+      { name: 'Sinners',                  detail: 'Autumn Durald Arkapaw',   photo: 'https://upload.wikimedia.org/wikipedia/en/8/8d/Sinners_2025_film_poster.jpg', photoType: 'poster' },
+      { name: 'Train Dreams',             detail: 'Adolpho Veloso',          photo: 'https://upload.wikimedia.org/wikipedia/en/5/58/Train_Dreams_poster.jpeg', photoType: 'poster' },
+    ],
+  },
+  {
+    id: 'best_film_editing',
+    name: 'Best Film Editing',
+    nominees: [
+      { name: 'F1',                       detail: 'Stephen Mirrione',              photo: 'https://upload.wikimedia.org/wikipedia/en/3/38/F1_%282025_film%29.png', photoType: 'poster' },
+      { name: 'Marty Supreme',            detail: 'Ronald Bronstein & Josh Safdie', photo: 'https://upload.wikimedia.org/wikipedia/en/b/ba/Marty_Supreme_poster.jpg', photoType: 'poster' },
+      { name: 'One Battle After Another', detail: 'Andy Jurgensen',                photo: 'https://upload.wikimedia.org/wikipedia/en/5/5d/One_Battle_After_Another.jpg', photoType: 'poster' },
+      { name: 'Sentimental Value',        detail: 'Olivier Bugge Coutté',          photo: 'https://upload.wikimedia.org/wikipedia/en/5/5c/Sentimental_Value_2025.jpeg', photoType: 'poster' },
+      { name: 'Sinners',                  detail: 'Michael P. Shawver',            photo: 'https://upload.wikimedia.org/wikipedia/en/8/8d/Sinners_2025_film_poster.jpg', photoType: 'poster' },
+    ],
+  },
+  {
+    id: 'best_original_score',
+    name: 'Best Original Score',
+    nominees: [
+      { name: 'Frankenstein',             detail: 'Alexandre Desplat',  photo: 'https://upload.wikimedia.org/wikipedia/en/9/94/Frankenstein_2025_film_poster.jpg', photoType: 'poster' },
+      { name: 'Bugonia',                  detail: 'Jerskin Fendrix',    photo: 'https://upload.wikimedia.org/wikipedia/commons/5/51/BUGONIA_FF_English_US_Poster_1080x1600_Static_V1_%281%29.jpg', photoType: 'poster' },
+      { name: 'One Battle After Another', detail: 'Jonny Greenwood',    photo: 'https://upload.wikimedia.org/wikipedia/en/5/5d/One_Battle_After_Another.jpg', photoType: 'poster' },
+      { name: 'Sinners',                  detail: 'Ludwig Göransson',   photo: 'https://upload.wikimedia.org/wikipedia/en/8/8d/Sinners_2025_film_poster.jpg', photoType: 'poster' },
+      { name: 'Hamnet',                   detail: 'Max Richter',        photo: 'https://upload.wikimedia.org/wikipedia/en/1/1f/Hamnet_film_poster.jpeg', photoType: 'poster' },
+    ],
+  },
+  {
+    id: 'best_original_song',
+    name: 'Best Original Song',
+    nominees: [
+      { name: '"Golden"',           detail: 'KPop Demon Hunters',        photo: 'https://upload.wikimedia.org/wikipedia/en/9/93/KPDHposter.jpeg', photoType: 'poster' },
+      { name: '"I Lied to You"',    detail: 'Sinners',                   photo: 'https://upload.wikimedia.org/wikipedia/en/8/8d/Sinners_2025_film_poster.jpg', photoType: 'poster' },
+      { name: '"Dear Me"',          detail: 'Diane Warren: Relentless',  photo: '', photoType: 'poster' },
+      { name: '"Sweet Dreams of Joy"', detail: 'Viva Verdi!',            photo: '', photoType: 'poster' },
+      { name: '"Train Dreams"',     detail: 'Train Dreams',              photo: 'https://upload.wikimedia.org/wikipedia/en/5/58/Train_Dreams_poster.jpeg', photoType: 'poster' },
+    ],
+  },
+  {
+    id: 'best_production_design',
+    name: 'Best Production Design',
+    nominees: [
+      { name: 'Frankenstein',             detail: 'Tamara Deverell, Shane Vieau',      photo: 'https://upload.wikimedia.org/wikipedia/en/9/94/Frankenstein_2025_film_poster.jpg', photoType: 'poster' },
+      { name: 'Hamnet',                   detail: 'Fiona Crombie, Alice Felton',       photo: 'https://upload.wikimedia.org/wikipedia/en/1/1f/Hamnet_film_poster.jpeg', photoType: 'poster' },
+      { name: 'Marty Supreme',            detail: 'Jack Fisk, Adam Willis',            photo: 'https://upload.wikimedia.org/wikipedia/en/b/ba/Marty_Supreme_poster.jpg', photoType: 'poster' },
+      { name: 'One Battle After Another', detail: 'Florencia Martin, Anthony Carlino', photo: 'https://upload.wikimedia.org/wikipedia/en/5/5d/One_Battle_After_Another.jpg', photoType: 'poster' },
+      { name: 'Sinners',                  detail: 'Hannah Beachler, Monique Champagne', photo: 'https://upload.wikimedia.org/wikipedia/en/8/8d/Sinners_2025_film_poster.jpg', photoType: 'poster' },
+    ],
+  },
+  {
+    id: 'best_costume_design',
+    name: 'Best Costume Design',
+    nominees: [
+      { name: 'Avatar: Fire and Ash', detail: 'Deborah L. Scott',    photo: 'https://upload.wikimedia.org/wikipedia/en/9/95/Avatar_Fire_and_Ash_poster.jpeg', photoType: 'poster' },
+      { name: 'Frankenstein',         detail: 'Kate Hawley',          photo: 'https://upload.wikimedia.org/wikipedia/en/9/94/Frankenstein_2025_film_poster.jpg', photoType: 'poster' },
+      { name: 'Hamnet',               detail: 'Malgosia Turzanska',   photo: 'https://upload.wikimedia.org/wikipedia/en/1/1f/Hamnet_film_poster.jpeg', photoType: 'poster' },
+      { name: 'Marty Supreme',        detail: 'Miyako Bellizzi',      photo: 'https://upload.wikimedia.org/wikipedia/en/b/ba/Marty_Supreme_poster.jpg', photoType: 'poster' },
+      { name: 'Sinners',              detail: 'Ruth E. Carter',       photo: 'https://upload.wikimedia.org/wikipedia/en/8/8d/Sinners_2025_film_poster.jpg', photoType: 'poster' },
+    ],
+  },
+  {
+    id: 'best_makeup_hairstyling',
+    name: 'Best Makeup and Hairstyling',
+    nominees: [
+      { name: 'Frankenstein',        detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/9/94/Frankenstein_2025_film_poster.jpg', photoType: 'poster' },
+      { name: 'Kokuho',              detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/2/2e/Kokuho_poster.jpg', photoType: 'poster' },
+      { name: 'Sinners',             detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/8/8d/Sinners_2025_film_poster.jpg', photoType: 'poster' },
+      { name: 'The Smashing Machine', detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/4/47/The_Smashing_Machine_%282025_film%29.jpg', photoType: 'poster' },
+      { name: 'The Ugly Stepsister', detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/c/c1/The_Ugly_Stepsister_film_poster.jpg', photoType: 'poster' },
+    ],
+  },
+  {
+    id: 'best_sound',
+    name: 'Best Sound',
+    nominees: [
+      { name: 'F1',                       detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/3/38/F1_%282025_film%29.png', photoType: 'poster' },
+      { name: 'Frankenstein',             detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/9/94/Frankenstein_2025_film_poster.jpg', photoType: 'poster' },
+      { name: 'One Battle After Another', detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/5/5d/One_Battle_After_Another.jpg', photoType: 'poster' },
+      { name: 'Sinners',                  detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/8/8d/Sinners_2025_film_poster.jpg', photoType: 'poster' },
+      { name: 'Sirāt',                    detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/9/91/Sirat_2025.jpeg', photoType: 'poster' },
+    ],
+  },
+  {
+    id: 'best_visual_effects',
+    name: 'Best Visual Effects',
+    nominees: [
+      { name: 'Avatar: Fire and Ash',   detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/9/95/Avatar_Fire_and_Ash_poster.jpeg', photoType: 'poster' },
+      { name: 'F1',                     detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/3/38/F1_%282025_film%29.png', photoType: 'poster' },
+      { name: 'Jurassic World Rebirth', detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/a/a5/Jurassic_World_Rebirth_poster.jpg', photoType: 'poster' },
+      { name: 'The Lost Bus',           detail: '', photo: '', photoType: 'poster' },
+      { name: 'Sinners',                detail: '', photo: 'https://upload.wikimedia.org/wikipedia/en/8/8d/Sinners_2025_film_poster.jpg', photoType: 'poster' },
+    ],
+  },
+  {
+    id: 'best_documentary_feature',
+    name: 'Best Documentary Feature Film',
+    nominees: [
+      { name: 'The Alabama Solution',           detail: 'Andrew Jarecki & Charlotte Kaufman', photo: '', photoType: 'poster' },
+      { name: 'Come See Me in the Good Light',  detail: 'Ryan White',                         photo: '', photoType: 'poster' },
+      { name: 'Cutting Through Rocks',          detail: 'Sara Khaki & Mohammadreza Eyni',     photo: '', photoType: 'poster' },
+      { name: 'Mr. Nobody Against Putin',       detail: 'David Borenstein',                   photo: '', photoType: 'poster' },
+      { name: 'The Perfect Neighbor',           detail: 'Geeta Gandbhir',                     photo: '', photoType: 'poster' },
+    ],
+  },
+  {
+    id: 'best_casting',
+    name: 'Best Casting',
+    nominees: [
+      { name: 'Hamnet',                   detail: 'Nina Gold',              photo: 'https://upload.wikimedia.org/wikipedia/en/1/1f/Hamnet_film_poster.jpeg', photoType: 'poster' },
+      { name: 'Marty Supreme',            detail: 'Jennifer Venditti',      photo: 'https://upload.wikimedia.org/wikipedia/en/b/ba/Marty_Supreme_poster.jpg', photoType: 'poster' },
+      { name: 'One Battle After Another', detail: 'Cassandra Kulukundis',   photo: 'https://upload.wikimedia.org/wikipedia/en/5/5d/One_Battle_After_Another.jpg', photoType: 'poster' },
+      { name: 'The Secret Agent',         detail: 'Gabriel Domingues',      photo: 'https://upload.wikimedia.org/wikipedia/en/5/57/The_Secret_Agent.png', photoType: 'poster' },
+      { name: 'Sinners',                  detail: 'Francine Maisler',       photo: 'https://upload.wikimedia.org/wikipedia/en/8/8d/Sinners_2025_film_poster.jpg', photoType: 'poster' },
     ],
   },
 ];
@@ -579,7 +602,7 @@ function HomePage({ picks, onSelect }) {
       <h1>Oscar<br/>Predictions</h1>
       <p className="subtitle">
         Make your picks across {total} categories and see how<br/>
-        you stack up on Hollywood&apos;s biggest night.
+        you stack up on Hollywood's biggest night.
       </p>
 
       <div className="progress-card">
@@ -592,8 +615,7 @@ function HomePage({ picks, onSelect }) {
       <div className="categories-grid">
         {CATEGORIES.map(cat => {
           const pick = picks[cat.id];
-          const thumb = pick?.photo || cat.nominees[0]?.photo;
-
+          const thumbSrc = pick?.photo || cat.nominees[0]?.photo || '';
           return (
             <div
               key={cat.id}
@@ -601,31 +623,26 @@ function HomePage({ picks, onSelect }) {
               onClick={() => onSelect(cat.id)}
             >
               <div className="cat-icon">
-                {thumb ? (
-                  <img src={thumb} alt={cat.name} />
-                ) : (
-                  <TrophyIcon color={pick ? '#D4A843' : '#555'} />
+                <TrophyIcon color={pick ? '#D4A843' : '#555'}/>
+                {thumbSrc && (
+                  <img
+                    src={thumbSrc}
+                    alt={cat.name}
+                    onError={e => { e.target.style.display = 'none'; }}
+                  />
                 )}
               </div>
-
               <div className="cat-body">
                 <div className="cat-title">{cat.name}</div>
                 <div className="cat-sub">{cat.nominees.length} nominees</div>
-
                 {pick && (
                   <>
-                    <div
-                      className="small"
-                      style={{ marginTop: 8, fontSize: '0.72rem', color: '#888', fontWeight: 400 }}
-                    >
-                      Your pick
-                    </div>
+                    <div className="cat-pick small" style={{marginTop:8,fontSize:'0.72rem',color:'#888',fontWeight:400}}>Your pick</div>
                     <div className="cat-pick">{pick.name}</div>
                     {pick.detail && <div className="cat-pick-detail">{pick.detail}</div>}
                   </>
                 )}
               </div>
-
               <div className="cat-right">
                 {pick ? (
                   <div className="check-circle"><CheckIcon/></div>
@@ -645,14 +662,14 @@ function HomePage({ picks, onSelect }) {
    CATEGORY PAGE
 ───────────────────────────────────────────── */
 function CategoryPage({ categoryId, picks, onPick, onBack }) {
-  const cat = CATEGORIES.find(c => c.id === categoryId);
+  const cat   = CATEGORIES.find(c => c.id === categoryId);
   const current = picks[categoryId];
 
   const initials = (name) => {
-    const parts = name.split(' ');
+    const parts = name.replace(/['"]/g, '').split(' ');
     return parts.length >= 2
       ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-      : name.slice(0, 2).toUpperCase();
+      : name.replace(/['"]/g, '').slice(0, 2).toUpperCase();
   };
 
   return (
@@ -682,17 +699,12 @@ function CategoryPage({ categoryId, picks, onPick, onBack }) {
             >
               <div className="nominee-avatar">
                 {n.photo
-                  ? (
-                    <img
+                  ? <img
                       src={n.photo}
                       alt={n.name}
                       className={n.photoType === 'poster' ? 'poster' : ''}
-                      onError={e => {
-                        e.target.style.display = 'none';
-                        e.target.parentNode.textContent = initials(n.name);
-                      }}
+                      onError={e => { e.target.style.display='none'; e.target.parentNode.textContent = initials(n.name); }}
                     />
-                  )
                   : initials(n.name)
                 }
               </div>
@@ -719,11 +731,8 @@ function App() {
     try {
       const saved = localStorage.getItem('goldticket_picks');
       return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
+    } catch { return {}; }
   });
-
   const [activeCat, setActiveCat] = useState(null);
 
   useEffect(() => {
@@ -753,7 +762,7 @@ function App() {
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
 </script>
 </body>
 </html>
