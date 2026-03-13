@@ -1232,9 +1232,9 @@ function Toast({ msg }) {
 /* ─────────────────────────────────────────────
    GROUP MODAL
 ───────────────────────────────────────────── */
-function GroupModal({ mode, groupName, inviteUrl, existingMembers = [], onClose, onCreate, onJoin }) {
+function GroupModal({ mode, groupName, inviteUrl, existingMembers = [], onClose, onCreate, onJoin, defaultCode = '' }) {
   const [name, setName] = useState('');
-  const [displayName, setDisplayName] = useState('');
+  const [displayName, setDisplayName] = useState(mode === 'entercode' ? defaultCode : '');
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -1973,11 +1973,16 @@ function App() {
     setGroupMember(mem);
     localStorage.setItem('goldticket_group', JSON.stringify(pendingGroup));
     localStorage.setItem('goldticket_member', JSON.stringify(mem));
+    localStorage.removeItem('goldticket_last_code');
     setPendingGroup(null);
     setModal(null);
   };
 
   const handleLeaveGroup = () => {
+    // Save invite code before clearing so user can easily re-join
+    if (currentGroup?.invite_code) {
+      localStorage.setItem('goldticket_last_code', currentGroup.invite_code);
+    }
     setCurrentGroup(null);
     setGroupMember(null);
     setGroupTab('picks');
@@ -2094,7 +2099,8 @@ function App() {
           existingMembers={pendingGroupMembers}
           onClose={() => setModal(null)}
           onCreate={modal === 'entercode' ? handleEnterCode : handleCreateGroup}
-          onJoin={handleJoinGroup}/>
+          onJoin={handleJoinGroup}
+          defaultCode={modal === 'entercode' ? (localStorage.getItem('goldticket_last_code') || '') : ''}/>
       )}
       <Toast msg={toast}/>
     </>
