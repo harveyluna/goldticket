@@ -1370,7 +1370,7 @@ function GroupModal({ mode, groupName, inviteUrl, existingMembers = [], onClose,
           onKeyDown={async e => {
             if (e.key === 'Enter' && displayName.trim() && !loading) {
               setLoading(true);
-              try { await onJoin(displayName.trim()); } catch(err) { console.error('[join]', err); }
+              try { await onJoin(displayName.trim(), existingMembers.includes(displayName.trim())); } catch(err) { console.error('[join]', err); }
               setLoading(false);
             }
           }}
@@ -1379,7 +1379,7 @@ function GroupModal({ mode, groupName, inviteUrl, existingMembers = [], onClose,
         <button className="modal-btn" disabled={!displayName.trim() || loading}
           onClick={async () => {
             setLoading(true);
-            try { await onJoin(displayName.trim()); } catch(err) { console.error('[join]', err); }
+            try { await onJoin(displayName.trim(), existingMembers.includes(displayName.trim())); } catch(err) { console.error('[join]', err); }
             setLoading(false);
           }}>
           {loading ? 'Joining…' : 'Join Group'}
@@ -2097,15 +2097,22 @@ function App() {
     setModal('created');
   };
 
-  const handleJoinGroup = async (displayName) => {
+  const handleJoinGroup = async (displayName, isExistingMember = false) => {
     if (!pendingGroup) return;
 
-    // Check by session_id first (catches returning users even if they changed display name,
-    // and avoids a unique-constraint crash on re-join attempts).
-    const { data: bySession } = await supabase.from('group_members')
-      .select('*').eq('group_id', pendingGroup.id).eq('session_id', sessionId.current).maybeSingle();
+    // When the user picks an existing name from the chip list, skip the session_id
+    // lookup entirely — otherwise a shared computer's session_id would match the
+    // previously-logged-in person and rename THAT record instead of restoring the
+    // correct one.  For new names we still check by session first so a returning
+    // user who typed a different name is correctly matched to their existing record.
+    let bySession = null;
+    if (!isExistingMember) {
+      const { data } = await supabase.from('group_members')
+        .select('*').eq('group_id', pendingGroup.id).eq('session_id', sessionId.current).maybeSingle();
+      bySession = data;
+    }
 
-    // Also check by display_name in case a different device used the same name
+    // Check by display_name (always, as the primary key for existing-member selections)
     const { data: byName } = !bySession
       ? await supabase.from('group_members').select('*')
           .eq('group_id', pendingGroup.id).eq('display_name', displayName).maybeSingle()
