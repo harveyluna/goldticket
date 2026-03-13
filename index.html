@@ -206,6 +206,24 @@
     .restore-picks-btn:hover { color: #aaa; }
     .export-pdf-btn { background: none; border: none; color: #9a7a30; cursor: pointer; padding: 6px; border-radius: 6px; font-family: inherit; transition: all 0.15s; margin-top: 8px; display: flex; align-items: center; justify-content: center; }
     .export-pdf-btn:hover { color: #D4A843; background: #1e1c14; }
+
+    /* ── Share Sheet ── */
+    .share-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; align-items: flex-end; justify-content: center; animation: fadeIn 0.18s ease; }
+    .share-sheet { background: #1a1812; border-radius: 20px 20px 0 0; width: 100%; max-width: 480px; padding: 0 0 env(safe-area-inset-bottom, 12px); animation: slideUp 0.28s cubic-bezier(0.32,0.72,0,1); overflow: hidden; }
+    .share-handle { width: 36px; height: 4px; background: #444; border-radius: 2px; margin: 10px auto 0; }
+    .share-title { text-align: center; font-size: 0.78rem; color: #666; padding: 8px 0 6px; letter-spacing: 0.04em; text-transform: uppercase; }
+    .share-preview { margin: 0 16px; border-radius: 10px; overflow: hidden; border: 1px solid #3a3020; height: 220px; background: #111; }
+    .share-preview iframe { width: 100%; height: 100%; border: none; }
+    .share-preview-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #555; font-size: 0.8rem; }
+    .share-actions { display: flex; justify-content: space-around; padding: 20px 8px 8px; }
+    .share-action-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; background: none; border: none; cursor: pointer; font-family: inherit; color: #ccc; font-size: 0.68rem; letter-spacing: 0.01em; min-width: 64px; }
+    .share-action-icon { width: 52px; height: 52px; border-radius: 14px; background: #2a2620; display: flex; align-items: center; justify-content: center; color: #D4A843; transition: background 0.15s; }
+    .share-action-btn:hover .share-action-icon { background: #3a3020; }
+    .share-divider { border: none; border-top: 1px solid #2a2620; margin: 0 16px; }
+    .share-cancel { width: 100%; background: none; border: none; color: #D4A843; font-size: 0.95rem; font-family: inherit; padding: 14px; cursor: pointer; font-weight: 500; }
+    .share-cancel:hover { color: #f0c060; }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
     .save-picks-btn { background: #1a2510; border: 1px solid #3a5a20; color: #7ec850; font-size: 0.85rem; cursor: pointer; padding: 7px 18px; border-radius: 8px; transition: all 0.2s; font-family: inherit; margin-top: 10px; }
     .save-picks-btn:hover:not(:disabled) { background: #223015; border-color: #5a8a35; }
     .save-picks-btn:disabled { opacity: 0.6; cursor: default; }
@@ -1429,6 +1447,89 @@ const initials = (name) => {
     : name.replace(/['"]/g, '').slice(0, 2).toUpperCase();
 };
 
+function ShareSheet({ pdfBlob, onClose }) {
+  const pdfUrl = React.useMemo(() => pdfBlob ? URL.createObjectURL(pdfBlob) : null, [pdfBlob]);
+  React.useEffect(() => () => { if (pdfUrl) URL.revokeObjectURL(pdfUrl); }, [pdfUrl]);
+
+  const download = () => {
+    const a = document.createElement('a');
+    a.href = pdfUrl; a.download = 'culture-brackets-ballot.pdf'; a.click();
+  };
+
+  const email = () => {
+    window.location.href = 'mailto:?subject=My%202026%20Oscar%20Ballot&body=Check%20out%20my%20Academy%20Awards%20picks%20on%20Culture%20Brackets!%20%F0%9F%8F%86';
+  };
+
+  const sms = () => {
+    window.location.href = 'sms:?body=Check%20out%20my%202026%20Oscar%20Ballot%20on%20Culture%20Brackets!%20%F0%9F%8F%86';
+  };
+
+  const copyLink = async () => {
+    try { await navigator.clipboard.writeText(window.location.href); alert('Link copied!'); }
+    catch { alert('Could not copy link.'); }
+  };
+
+  const nativeShare = async () => {
+    if (!navigator.share) return download();
+    try {
+      const file = new File([pdfBlob], 'culture-brackets-ballot.pdf', { type: 'application/pdf' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'My 2026 Oscar Ballot' });
+      } else {
+        await navigator.share({ title: 'My 2026 Oscar Ballot', url: window.location.href });
+      }
+    } catch (e) { if (e.name !== 'AbortError') download(); }
+  };
+
+  const actions = [
+    {
+      label: 'Download', fn: download,
+      icon: <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    },
+    {
+      label: 'Mail', fn: email,
+      icon: <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+    },
+    {
+      label: 'Message', fn: sms,
+      icon: <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    },
+    {
+      label: 'Copy Link', fn: copyLink,
+      icon: <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+    },
+    {
+      label: 'More', fn: nativeShare,
+      icon: <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+    },
+  ];
+
+  return (
+    <div className="share-overlay" onClick={onClose}>
+      <div className="share-sheet" onClick={e => e.stopPropagation()}>
+        <div className="share-handle"/>
+        <div className="share-title">Share Ballot</div>
+        <div className="share-preview">
+          {pdfUrl
+            ? <iframe src={pdfUrl} title="Ballot Preview"/>
+            : <div className="share-preview-placeholder"><span style={{fontSize:'2rem'}}>📄</span><span>Generating preview…</span></div>
+          }
+        </div>
+        <div className="share-actions">
+          {actions.map(a => (
+            <button key={a.label} className="share-action-btn" onClick={a.fn}>
+              <span className="share-action-icon">{a.icon}</span>
+              {a.label}
+            </button>
+          ))}
+        </div>
+        <hr className="share-divider"/>
+        <button className="share-cancel" onClick={onClose}>Cancel</button>
+      </div>
+    </div>
+  );
+}
+
 function HomePage({ picks, winners, onPick, onClearAll, onExport, currentGroup, groupMember, onCreateGroup, onLeaveGroup, onRestorePicks, isLocked, now, groupMembers, groupPicksMap }) {
   const total = CATEGORIES.length;
   const done  = Object.keys(picks).length;
@@ -1829,6 +1930,7 @@ function App() {
   const [scraping, setScraping]           = useState(false);
   const [createdGroupName, setCreatedGroupName] = useState('');
   const [inviteUrl, setInviteUrl]         = useState('');
+  const [shareBlob, setShareBlob]         = useState(null);
 
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -2306,8 +2408,16 @@ function App() {
       doc.text(`culturebrackets  ·  Page ${p} of ${totalPages}`, PW / 2, PH - 10, { align: 'center' });
     }
 
-    doc.save('culture-brackets-ballot.pdf');
-    showToast('📄 Ballot exported!');
+    return doc.output('blob');
+  };
+
+  const handleShare = () => {
+    if (typeof window.jspdf === 'undefined') {
+      showToast('PDF library not loaded — please refresh and try again.');
+      return;
+    }
+    const blob = handleExportPDF();
+    setShareBlob(blob);
   };
 
   const handleCopyInvite = async () => {
@@ -2368,7 +2478,7 @@ function App() {
     content = <WinnerEntryPage winners={winners} onSave={handleSaveWinners} onScrape={handleScrape} scraping={scraping}/>;
   } else {
     content = <HomePage picks={picks} winners={winners} onPick={handlePick}
-      onClearAll={() => setPicks({})} onExport={handleExportPDF}
+      onClearAll={() => setPicks({})} onExport={handleShare}
       currentGroup={currentGroup} groupMember={groupMember}
       onCreateGroup={() => setModal('create')} onLeaveGroup={handleLeaveGroup}
       onRestorePicks={() => setModal('entercode')}
@@ -2393,6 +2503,7 @@ function App() {
           onJoin={handleJoinGroup}
           defaultCode={modal === 'entercode' ? (localStorage.getItem('goldticket_last_code') || '') : ''}/>
       )}
+      {shareBlob && <ShareSheet pdfBlob={shareBlob} onClose={() => setShareBlob(null)}/>}
       <Toast msg={toast}/>
     </>
   );
