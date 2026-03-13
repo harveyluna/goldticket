@@ -1447,7 +1447,7 @@ const initials = (name) => {
     : name.replace(/['"]/g, '').slice(0, 2).toUpperCase();
 };
 
-function ShareSheet({ pdfBlob, inviteCode, onClose }) {
+function ShareSheet({ pdfBlob, onClose }) {
   const pdfUrl = React.useMemo(() => pdfBlob ? URL.createObjectURL(pdfBlob) : null, [pdfBlob]);
   React.useEffect(() => () => { if (pdfUrl) URL.revokeObjectURL(pdfUrl); }, [pdfUrl]);
 
@@ -1476,17 +1476,6 @@ function ShareSheet({ pdfBlob, inviteCode, onClose }) {
   const email   = () => shareViaNative('mailto:?subject=My%202026%20Oscar%20Ballot&body=Check%20out%20my%20Academy%20Awards%20picks%20on%20Culture%20Brackets!%20%F0%9F%8F%86');
   const message = () => shareViaNative('sms:?body=Check%20out%20my%202026%20Oscar%20Ballot%20on%20Culture%20Brackets!%20%F0%9F%8F%86');
 
-  const [inviteCopied, setInviteCopied] = React.useState(false);
-  const copyInvite = async () => {
-    const base = window.location.origin + window.location.pathname;
-    const url = inviteCode ? `${base}?group=${inviteCode}` : base;
-    try {
-      await navigator.clipboard.writeText(url);
-      setInviteCopied(true);
-      setTimeout(() => setInviteCopied(false), 2000);
-    } catch { alert('Could not copy invite link.'); }
-  };
-
   const nativeShare = async () => shareViaNative(null);
 
   const actions = [
@@ -1501,10 +1490,6 @@ function ShareSheet({ pdfBlob, inviteCode, onClose }) {
     {
       label: 'Message', fn: message,
       icon: <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-    },
-    {
-      label: inviteCopied ? 'Copied!' : 'Invite', fn: copyInvite,
-      icon: <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
     },
     {
       label: 'More', fn: nativeShare,
@@ -2511,7 +2496,7 @@ function App() {
           onJoin={handleJoinGroup}
           defaultCode={modal === 'entercode' ? (localStorage.getItem('goldticket_last_code') || '') : ''}/>
       )}
-      {shareBlob && <ShareSheet pdfBlob={shareBlob} inviteCode={currentGroup?.invite_code} onClose={() => setShareBlob(null)}/>}
+      {shareBlob && <ShareSheet pdfBlob={shareBlob} onClose={() => setShareBlob(null)}/>}
       <Toast msg={toast}/>
     </>
   );
