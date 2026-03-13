@@ -399,6 +399,13 @@
       border-color: #5a2070;
       color: #cc88ee;
     }
+    .watch-link {
+      color: #a78bfa;
+      text-decoration: underline;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .watch-link:hover { color: #c4b5fd; }
     .lock-banner {
       background: #1e1020;
       border: 1px solid #5a2070;
@@ -1130,7 +1137,7 @@ function formatCountdown(ms) {
   const h = Math.floor((totalSec % 86400) / 3600);
   const m = Math.floor((totalSec % 3600) / 60);
   const s = totalSec % 60;
-  if (d > 0) return `${d}d ${h}h ${m}m`;
+  if (d > 0) return `${d}d ${h}h ${m}m ${s}s`;
   if (h > 0) return `${h}h ${m}m ${s}s`;
   return `${m}m ${s}s`;
 }
@@ -1420,17 +1427,6 @@ function HomePage({ picks, winners, onSelect, onClearAll, currentGroup, groupMem
         </div>
       )}
 
-      {/* Lock countdown strip */}
-      {isLocked ? (
-        <div className="lock-strip locked">
-          🔒 Picks are locked — Oscar night is here!
-        </div>
-      ) : (
-        <div className="lock-strip">
-          🎬 Picks lock in <strong>{formatCountdown(LOCK_TIME.getTime() - now)}</strong> — Sun Mar 15 at 6 pm CST
-        </div>
-      )}
-
       <div className="progress-card">
         <ProgressRing value={done} total={total}/>
         <span className="remain muted">
@@ -1485,6 +1481,19 @@ function HomePage({ picks, winners, onSelect, onClearAll, currentGroup, groupMem
           );
         })}
       </div>
+
+      {/* Lock countdown strip */}
+      {isLocked ? (
+        <div className="lock-strip locked">
+          🔒 Picks are locked — Oscar night is here!{' '}
+          <a href="https://www.oscars.org/how-to-watch/" target="_blank" rel="noopener noreferrer" className="watch-link">Watch the Oscars live!</a>
+        </div>
+      ) : (
+        <div className="lock-strip">
+          Selections are automatically locked-in in <strong>{formatCountdown(LOCK_TIME.getTime() - now)}</strong> — Sun Mar 15 at 6 pm CST.{' '}
+          <a href="https://www.oscars.org/how-to-watch/" target="_blank" rel="noopener noreferrer" className="watch-link">Watch the Oscars live!</a>
+        </div>
+      )}
     </div>
   );
 }
