@@ -78,6 +78,7 @@
     .nav-tab:hover { color: #ccc; }
     .nav-tab.active { color: #D4A843; border-bottom-color: #D4A843; }
     .nav-tab-spacer { flex: 1; min-width: 8px; }
+    .nav-logo { height: 22px; width: auto; flex-shrink: 0; margin-right: 14px; display: block; }
     .invite-btn {
       background: #1e1c14;
       border: 1px solid #3a3020;
@@ -1385,6 +1386,7 @@ function GroupNav({ group, tab, isAdmin, onTabChange, onInvite }) {
   return (
     <div className="group-nav">
       <div className="group-nav-inner">
+        <img src="images/cb-logo.svg" className="nav-logo" alt="Culture Brackets"/>
         <span className="group-nav-name">🏆 {group.name}</span>
         <button className={`nav-tab${tab==='picks'?' active':''}`} onClick={() => onTabChange('picks')}>My Picks</button>
         <button className={`nav-tab${tab==='leaderboard'?' active':''}`} onClick={() => onTabChange('leaderboard')}>Leaderboard</button>
