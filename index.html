@@ -1439,6 +1439,19 @@ function HomePage({ picks, winners, onSelect, onClearAll, currentGroup, groupMem
         )}
       </div>
 
+      {/* Lock countdown strip */}
+      {isLocked ? (
+        <div className="lock-strip locked">
+          🔒 Picks are locked — Oscar night is here!{' '}
+          <a href="https://www.oscars.org/how-to-watch/" target="_blank" rel="noopener noreferrer" className="watch-link">Watch the Oscars live!</a>
+        </div>
+      ) : (
+        <div className="lock-strip">
+          Selections are automatically locked-in in <strong>{formatCountdown(LOCK_TIME.getTime() - now)}</strong> — Sun Mar 15 at 6 pm CST.{' '}
+          <a href="https://www.oscars.org/how-to-watch/" target="_blank" rel="noopener noreferrer" className="watch-link">Watch the Oscars live!</a>
+        </div>
+      )}
+
       <div className="categories-grid">
         {CATEGORIES.map(cat => {
           const pick = picks[cat.id];
@@ -1481,19 +1494,6 @@ function HomePage({ picks, winners, onSelect, onClearAll, currentGroup, groupMem
           );
         })}
       </div>
-
-      {/* Lock countdown strip */}
-      {isLocked ? (
-        <div className="lock-strip locked">
-          🔒 Picks are locked — Oscar night is here!{' '}
-          <a href="https://www.oscars.org/how-to-watch/" target="_blank" rel="noopener noreferrer" className="watch-link">Watch the Oscars live!</a>
-        </div>
-      ) : (
-        <div className="lock-strip">
-          Selections are automatically locked-in in <strong>{formatCountdown(LOCK_TIME.getTime() - now)}</strong> — Sun Mar 15 at 6 pm CST.{' '}
-          <a href="https://www.oscars.org/how-to-watch/" target="_blank" rel="noopener noreferrer" className="watch-link">Watch the Oscars live!</a>
-        </div>
-      )}
     </div>
   );
 }
