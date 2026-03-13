@@ -1533,11 +1533,14 @@ function App() {
   const [createdGroupName, setCreatedGroupName] = useState('');
   const [inviteUrl, setInviteUrl]         = useState('');
 
-  const sessionId        = useRef(getSessionId());
-  const saveTimeout      = useRef(null);
-  const groupSaveTimeout = useRef(null);
-  const currentGroupRef  = useRef(currentGroup);
+  const sessionId          = useRef(getSessionId());
+  const saveTimeout        = useRef(null);
+  const groupSaveTimeout   = useRef(null);
+  const currentGroupRef    = useRef(currentGroup);
+  const picksRef           = useRef(picks);          // always-current picks for async callbacks
+  const userModifiedPicks  = useRef(false);           // true once user actually makes a pick
   useEffect(() => { currentGroupRef.current = currentGroup; }, [currentGroup]);
+  useEffect(() => { picksRef.current = picks; }, [picks]);
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 2800); };
 
@@ -1577,24 +1580,27 @@ function App() {
   }, []);
 
   // ── Load picks from Supabase on mount ──
-  // If already in a group, prefer group_picks (canonical source across devices)
+  // If already in a group, prefer group_picks (canonical source across devices).
+  // Guard: if the user already made picks while this async call was in-flight,
+  // don't overwrite them — their new picks will be saved by the sync effect.
   useEffect(() => {
+    const applyIfUnmodified = (newPicks) => {
+      if (userModifiedPicks.current) return; // user already acted — don't clobber
+      if (!newPicks || Object.keys(newPicks).length === 0) return;
+      setPicks(newPicks);
+      localStorage.setItem('goldticket_picks', JSON.stringify(newPicks));
+    };
+
     const loadFromGlobal = () =>
       supabase.from('picks').select('picks').eq('session_id', sessionId.current).maybeSingle()
-        .then(({ data }) => {
-          if (data?.picks && Object.keys(data.picks).length > 0) {
-            setPicks(data.picks);
-            localStorage.setItem('goldticket_picks', JSON.stringify(data.picks));
-          }
-        });
+        .then(({ data }) => applyIfUnmodified(data?.picks));
 
     if (currentGroup) {
       supabase.from('group_picks').select('picks')
         .eq('group_id', currentGroup.id).eq('session_id', sessionId.current).maybeSingle()
         .then(({ data: gp }) => {
           if (gp?.picks && Object.keys(gp.picks).length > 0) {
-            setPicks(gp.picks);
-            localStorage.setItem('goldticket_picks', JSON.stringify(gp.picks));
+            applyIfUnmodified(gp.picks);
           } else {
             loadFromGlobal();
           }
@@ -1613,6 +1619,28 @@ function App() {
     });
   }, [currentGroup?.id]);
 
+  // ── Immediate save when user hides the tab / closes the app ──
+  // Uses picksRef so the callback always reads the latest picks without stale closure.
+  useEffect(() => {
+    const handleHide = () => {
+      if (!currentGroupRef.current) return;
+      const latest = picksRef.current;
+      supabase.from('group_picks').upsert({
+        group_id: currentGroupRef.current.id,
+        session_id: sessionId.current,
+        picks: latest,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'group_id,session_id' });
+      supabase.from('picks').upsert({
+        session_id: sessionId.current,
+        picks: latest,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'session_id' });
+    };
+    document.addEventListener('visibilitychange', handleHide);
+    return () => document.removeEventListener('visibilitychange', handleHide);
+  }, []);
+
   // ── Sync picks to Supabase ──
   useEffect(() => {
     localStorage.setItem('goldticket_picks', JSON.stringify(picks));
@@ -1626,14 +1654,17 @@ function App() {
           session_id: sessionId.current,
           picks,
           updated_at: new Date().toISOString(),
-        });
+        }, { onConflict: 'group_id,session_id' });
       }
     }, 200);
 
     // Save to global picks table (longer debounce, less critical)
     clearTimeout(saveTimeout.current);
     saveTimeout.current = setTimeout(() => {
-      supabase.from('picks').upsert({ session_id: sessionId.current, picks, updated_at: new Date().toISOString() });
+      supabase.from('picks').upsert(
+        { session_id: sessionId.current, picks, updated_at: new Date().toISOString() },
+        { onConflict: 'session_id' }
+      );
     }, 600);
   }, [picks]);
 
@@ -1657,6 +1688,7 @@ function App() {
 
   // ── Handlers ──
   const handlePick = (catId, nominee) => {
+    userModifiedPicks.current = true;
     setPicks(prev => {
       if (prev[catId]?.name === nominee.name) {
         const { [catId]: _, ...rest } = prev;
