@@ -1458,43 +1458,30 @@ function ShareSheet({ pdfBlob, inviteCode, onClose }) {
     a.href = pdfUrl; a.download = 'culture-brackets-ballot.pdf'; a.click();
   };
 
-  // Share PDF via native share sheet (Mail, Messages, etc.) — attaches file on mobile
-  const shareViaNative = async (fallbackUrl) => {
-    if (!navigator.share) { if (fallbackUrl) window.location.href = fallbackUrl; else download(); return; }
-    try {
-      const file = getPdfFile();
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'My 2026 Oscar Ballot' });
-      } else if (fallbackUrl) {
-        window.location.href = fallbackUrl;
-      } else {
-        download();
-      }
-    } catch (e) { if (e.name !== 'AbortError') { if (fallbackUrl) window.location.href = fallbackUrl; else download(); } }
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  // Helper: share file via native share sheet (mobile only)
+  const shareFileNative = async () => {
+    const file = getPdfFile();
+    await navigator.share({ files: [file], title: 'My 2026 Oscar Ballot' });
   };
 
-  const email = () => shareViaNative('mailto:?subject=My%202026%20Oscar%20Ballot&body=Check%20out%20my%20Academy%20Awards%20picks%20on%20Culture%20Brackets!%20%F0%9F%8F%86');
-
-  // Message: always try to attach the PDF via Web Share API first.
-  // sms: URI can't carry files, so only use it as a last resort (no attachment).
-  const message = async () => {
-    const file = getPdfFile();
-    if (navigator.share) {
-      try {
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], title: 'My 2026 Oscar Ballot' });
-        } else {
-          // Share API available but can't attach files — open sms: without attachment
-          window.location.href = 'sms:?body=Check%20out%20my%202026%20Oscar%20Ballot%20on%20Culture%20Brackets!%20%F0%9F%8F%86';
-        }
-      } catch (e) {
-        if (e.name !== 'AbortError') {
-          window.location.href = 'sms:?body=Check%20out%20my%202026%20Oscar%20Ballot%20on%20Culture%20Brackets!%20%F0%9F%8F%86';
-        }
-      }
+  // Mail — desktop: download PDF then open email client; mobile: native share sheet
+  const email = () => {
+    if (isMobile && navigator.share && navigator.canShare && navigator.canShare({ files: [getPdfFile()] })) {
+      shareFileNative().catch(e => { if (e.name !== 'AbortError') window.location.href = 'mailto:?subject=My%202026%20Oscar%20Ballot'; });
     } else {
-      // Desktop fallback — open default SMS/Messages app without file
-      window.location.href = 'sms:?body=Check%20out%20my%202026%20Oscar%20Ballot%20on%20Culture%20Brackets!%20%F0%9F%8F%86';
+      download();
+      setTimeout(() => { window.location.href = 'mailto:?subject=My%202026%20Oscar%20Ballot&body=See%20attached%20PDF%20for%20my%202026%20Academy%20Awards%20picks!'; }, 400);
+    }
+  };
+
+  // Message — desktop: open sms: (no file possible); mobile: native share sheet with file
+  const message = () => {
+    if (isMobile && navigator.share && navigator.canShare && navigator.canShare({ files: [getPdfFile()] })) {
+      shareFileNative().catch(e => { if (e.name !== 'AbortError') window.location.href = 'sms:?body=Check%20out%20my%202026%20Oscar%20Ballot%20on%20Culture%20Brackets!'; });
+    } else {
+      window.location.href = 'sms:?body=Check%20out%20my%202026%20Oscar%20Ballot%20on%20Culture%20Brackets!';
     }
   };
 
@@ -1509,7 +1496,16 @@ function ShareSheet({ pdfBlob, inviteCode, onClose }) {
     } catch { alert('Could not copy invite link.'); }
   };
 
-  const nativeShare = async () => shareViaNative(null);
+  // More — native share sheet with file if supported, otherwise just download
+  const nativeShare = () => {
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [getPdfFile()] })) {
+      shareFileNative().catch(e => { if (e.name !== 'AbortError') download(); });
+    } else if (navigator.share) {
+      navigator.share({ title: 'My 2026 Oscar Ballot', url: window.location.href }).catch(() => {});
+    } else {
+      download();
+    }
+  };
 
   const actions = [
     {
