@@ -707,50 +707,32 @@ const supabase = window.supabase.createClient(
 // These avoid relying on unique constraints (upsert + onConflict requires a DB
 // constraint; without it, every upsert inserts a new row, making reads fail).
 
-async function saveGroupPicks(groupId, sid, picksData) {
-  // Try update first; if nothing matched (empty data), insert.
-  // Do NOT include updated_at — it may not exist in the schema.
-  const { data: updated, error: ue } = await supabase.from('group_picks')
-    .update({ picks: picksData })
-    .eq('group_id', groupId).eq('session_id', sid)
-    .select('group_id');
-  if (ue) console.error('[saveGroupPicks] update error', ue);
-  if (!updated || updated.length === 0) {
-    const { error: ie } = await supabase.from('group_picks')
-      .insert({ group_id: groupId, session_id: sid, picks: picksData });
-    if (ie) console.error('[saveGroupPicks] insert error', ie);
-  }
+// group_picks is now keyed by (group_id, member_id) — stable across all sessions/devices.
+async function saveGroupPicks(groupId, memberId, picksData) {
+  const { error } = await supabase.from('group_picks')
+    .upsert({ group_id: groupId, member_id: memberId, picks: picksData }, { onConflict: 'group_id,member_id' });
+  if (error) console.error('[saveGroupPicks]', error);
 }
 
 async function saveGlobalPicks(sid, picksData) {
-  const { data: updated, error: ue } = await supabase.from('picks')
-    .update({ picks: picksData })
-    .eq('session_id', sid)
-    .select('session_id');
-  if (ue) console.error('[saveGlobalPicks] update error', ue);
-  if (!updated || updated.length === 0) {
-    const { error: ie } = await supabase.from('picks')
-      .insert({ session_id: sid, picks: picksData });
-    if (ie) console.error('[saveGlobalPicks] insert error', ie);
-  }
+  const { error } = await supabase.from('picks')
+    .upsert({ session_id: sid, picks: picksData }, { onConflict: 'session_id' });
+  if (error) console.error('[saveGlobalPicks]', error);
 }
 
-// Safe reads: no updated_at ordering — just take the first matching row.
-async function fetchGroupPicks(groupId, sid) {
+async function fetchGroupPicks(groupId, memberId) {
   const { data, error } = await supabase.from('group_picks')
-    .select('picks').eq('group_id', groupId).eq('session_id', sid)
-    .limit(1);
-  if (error) console.error('[fetchGroupPicks] error', error);
-  const p = data?.[0]?.picks;
+    .select('picks').eq('group_id', groupId).eq('member_id', memberId).maybeSingle();
+  if (error) console.error('[fetchGroupPicks]', error);
+  const p = data?.picks;
   return p && Object.keys(p).length > 0 ? p : null;
 }
 
 async function fetchGlobalPicks(sid) {
   const { data, error } = await supabase.from('picks')
-    .select('picks').eq('session_id', sid)
-    .limit(1);
-  if (error) console.error('[fetchGlobalPicks] error', error);
-  const p = data?.[0]?.picks;
+    .select('picks').eq('session_id', sid).maybeSingle();
+  if (error) console.error('[fetchGlobalPicks]', error);
+  const p = data?.picks;
   return p && Object.keys(p).length > 0 ? p : null;
 }
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1520,7 +1502,7 @@ function LeaderboardPage({ members, groupPicksMap, winners, sessionId }) {
   const winnersSet  = Object.keys(winners).length;
 
   const ranked = members.map(m => {
-    const mPicks = groupPicksMap[m.session_id] || {};
+    const mPicks = groupPicksMap[m.id] || {};
     let score = 0;
     for (const catId in winners) {
       if (mPicks[catId]?.name === winners[catId]) score++;
@@ -1645,9 +1627,11 @@ function App() {
   const groupSaveTimeout   = useRef(null);
   const currentGroupRef    = useRef(currentGroup);
   const picksRef           = useRef(picks);          // always-current picks for async callbacks
+  const groupMemberRef     = useRef(groupMember);    // always-current groupMember for async callbacks
   const userModifiedPicks  = useRef(false);           // true once user actually makes a pick
   useEffect(() => { currentGroupRef.current = currentGroup; }, [currentGroup]);
   useEffect(() => { picksRef.current = picks; }, [picks]);
+  useEffect(() => { groupMemberRef.current = groupMember; }, [groupMember]);
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 2800); };
 
@@ -1668,7 +1652,7 @@ function App() {
               localStorage.setItem('goldticket_group', JSON.stringify(grp));
               localStorage.setItem('goldticket_member', JSON.stringify(mem));
               // Always refresh picks from group_picks to get latest across all devices
-              fetchGroupPicks(grp.id, sessionId.current).then(gp => {
+              fetchGroupPicks(grp.id, mem.id).then(gp => {
                 if (gp) {
                   setPicks(gp);
                   localStorage.setItem('goldticket_picks', JSON.stringify(gp));
@@ -1699,8 +1683,8 @@ function App() {
     const loadFromGlobal = () =>
       fetchGlobalPicks(sessionId.current).then(p => applyIfUnmodified(p));
 
-    if (currentGroup) {
-      fetchGroupPicks(currentGroup.id, sessionId.current).then(gp => {
+    if (currentGroup && groupMember) {
+      fetchGroupPicks(currentGroup.id, groupMember.id).then(gp => {
         if (gp) {
           applyIfUnmodified(gp);
         } else {
@@ -1713,20 +1697,15 @@ function App() {
   }, []);
 
   // ── Keep group_members.session_id in sync with current session ──
-  // If a previous incognito visit pointed group_members to a different session,
-  // re-point it to the current session and save the current picks under it.
-  // This ensures the next incognito restore always finds the freshest picks.
+  // Picks are now keyed by stable member_id so no pick migration needed.
+  // Just keep session_id current so the leaderboard "you" badge highlights correctly.
   useEffect(() => {
     if (!currentGroup || !groupMember) return;
-    (async () => {
-      const { data: memRow } = await supabase
-        .from('group_members').select('session_id').eq('id', groupMember.id).maybeSingle();
-      if (memRow && memRow.session_id !== sessionId.current) {
-        await supabase.from('group_members')
-          .update({ session_id: sessionId.current }).eq('id', groupMember.id);
-        await saveGroupPicks(currentGroup.id, sessionId.current, picksRef.current);
-      }
-    })();
+    supabase.from('group_members')
+      .update({ session_id: sessionId.current })
+      .eq('id', groupMember.id)
+      .neq('session_id', sessionId.current) // no-op if already current
+      .then(() => {});
   }, [currentGroup?.id]);
 
   // ── Load winners on mount / group change ──
@@ -1743,7 +1722,8 @@ function App() {
   useEffect(() => {
     const handleHide = () => {
       const latest = picksRef.current;
-      if (currentGroupRef.current) saveGroupPicks(currentGroupRef.current.id, sessionId.current, latest);
+      if (currentGroupRef.current && groupMemberRef.current)
+        saveGroupPicks(currentGroupRef.current.id, groupMemberRef.current.id, latest);
       saveGlobalPicks(sessionId.current, latest);
     };
     document.addEventListener('visibilitychange', handleHide);
@@ -1757,7 +1737,8 @@ function App() {
     // Save to group_picks quickly so returning users always get latest
     clearTimeout(groupSaveTimeout.current);
     groupSaveTimeout.current = setTimeout(() => {
-      if (currentGroupRef.current) saveGroupPicks(currentGroupRef.current.id, sessionId.current, picks);
+      if (currentGroupRef.current && groupMemberRef.current)
+        saveGroupPicks(currentGroupRef.current.id, groupMemberRef.current.id, picks);
     }, 200);
 
     // Save to global picks table (longer debounce, less critical)
@@ -1776,7 +1757,7 @@ function App() {
     ]);
     setGroupMembers(mems || []);
     const map = {};
-    (allPicks || []).forEach(p => { map[p.session_id] = p.picks; });
+    (allPicks || []).forEach(p => { map[p.member_id] = p.picks; });
     setGroupPicksMap(map);
     // Also reload winners
     const { data: wData } = await supabase.from('winners').select('*');
@@ -1806,7 +1787,7 @@ function App() {
       .insert({ group_id: grp.id, session_id: sessionId.current, display_name: displayName })
       .select().single();
 
-    await saveGroupPicks(grp.id, sessionId.current, picks);
+    await saveGroupPicks(grp.id, mem.id, picks);
 
     setCurrentGroup(grp);
     setGroupMember(mem);
@@ -1832,28 +1813,23 @@ function App() {
 
     let mem;
     if (existing) {
-      // Returning user — try group_picks first, then fall back to global picks table
-      const restoredPicks = await fetchGroupPicks(pendingGroup.id, existing.session_id)
+      // Returning user — picks are keyed by stable member_id, works across all devices
+      const restoredPicks = await fetchGroupPicks(pendingGroup.id, existing.id)
         || await fetchGlobalPicks(existing.session_id);
 
+      // Update session_id so the leaderboard "you" badge highlights correctly
       if (existing.session_id !== sessionId.current) {
-        // Different device/session — re-point member row and migrate picks
         const { data: updatedMem } = await supabase.from('group_members')
           .update({ session_id: sessionId.current })
           .eq('id', existing.id)
           .select().single();
         mem = updatedMem || { ...existing, session_id: sessionId.current };
-
-        // Delete ALL old rows for the previous session then write one clean row
-        await supabase.from('group_picks')
-          .delete()
-          .eq('group_id', pendingGroup.id)
-          .eq('session_id', existing.session_id);
-        await saveGroupPicks(pendingGroup.id, sessionId.current, restoredPicks || picks);
       } else {
         mem = existing;
-        if (!restoredPicks) await saveGroupPicks(pendingGroup.id, sessionId.current, picks);
       }
+
+      // Write the resolved picks under the stable member_id
+      await saveGroupPicks(pendingGroup.id, existing.id, restoredPicks || picks);
 
       if (restoredPicks) {
         setPicks(restoredPicks);
@@ -1868,7 +1844,7 @@ function App() {
         .insert({ group_id: pendingGroup.id, session_id: sessionId.current, display_name: displayName })
         .select().single();
       mem = newMem;
-      await saveGroupPicks(pendingGroup.id, sessionId.current, picks);
+      await saveGroupPicks(pendingGroup.id, newMem.id, picks);
       showToast(`Welcome to ${pendingGroup.name}!`);
     }
 
@@ -1959,7 +1935,7 @@ function App() {
   const handleSavePicks = async () => {
     try {
       await saveGlobalPicks(sessionId.current, picks);
-      if (currentGroup) await saveGroupPicks(currentGroup.id, sessionId.current, picks);
+      if (currentGroup && groupMember) await saveGroupPicks(currentGroup.id, groupMember.id, picks);
       return true;
     } catch {
       showToast('⚠️ Could not save. Check your connection and try again.');
