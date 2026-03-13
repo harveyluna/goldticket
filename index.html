@@ -61,11 +61,25 @@
     .group-nav-inner {
       max-width: 900px;
       margin: 0 auto;
-      padding: 0 20px;
+      padding: 0 0 0 20px;
       display: flex;
       align-items: center;
       gap: 0;
+      /* no overflow here — handled by inner scroll zone */
+    }
+    .group-nav-scroll {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
       overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .group-nav-scroll::-webkit-scrollbar { display: none; }
+    .nav-invite-wrap {
+      flex-shrink: 0;
+      padding: 0 16px 0 10px;
+      background: #161616;
     }
     .group-nav-name {
       color: #D4A843;
@@ -1509,13 +1523,18 @@ function GroupNav({ group, tab, isAdmin, onTabChange, onInvite }) {
   return (
     <div className="group-nav">
       <div className="group-nav-inner">
-        <img src="images/cb-logo.svg" className="nav-logo" alt="Culture Brackets"/>
-        <span className="group-nav-name">🏆 {group.name}</span>
-        <button className={`nav-tab${tab==='picks'?' active':''}`} onClick={() => onTabChange('picks')}>My Picks</button>
-        <button className={`nav-tab${tab==='leaderboard'?' active':''}`} onClick={() => onTabChange('leaderboard')}>Leaderboard</button>
-        {isAdmin && <button className={`nav-tab${tab==='winners'?' active':''}`} onClick={() => onTabChange('winners')}>Set Winners</button>}
-        <div className="nav-tab-spacer"/>
-        <button className="invite-btn" onClick={onInvite}>🔗 Invite</button>
+        {/* Scrollable zone: logo + name + tabs */}
+        <div className="group-nav-scroll">
+          <img src="images/cb-logo.svg" className="nav-logo" alt="Culture Brackets"/>
+          <span className="group-nav-name">🏆 {group.name}</span>
+          <button className={`nav-tab${tab==='picks'?' active':''}`} onClick={() => onTabChange('picks')}>My Picks</button>
+          <button className={`nav-tab${tab==='leaderboard'?' active':''}`} onClick={() => onTabChange('leaderboard')}>Leaderboard</button>
+          {isAdmin && <button className={`nav-tab${tab==='winners'?' active':''}`} onClick={() => onTabChange('winners')}>Set Winners</button>}
+        </div>
+        {/* Pinned right: always visible */}
+        <div className="nav-invite-wrap">
+          <button className="invite-btn" onClick={onInvite}>🔗 Invite</button>
+        </div>
       </div>
     </div>
   );
