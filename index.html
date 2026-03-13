@@ -1249,14 +1249,18 @@ function GroupModal({ mode, groupName, inviteUrl, existingMembers = [], onClose,
           onKeyDown={async e => {
             if (e.key === 'Enter' && displayName.trim() && !loading) {
               setLoading(true);
-              await onJoin(displayName.trim());
+              try { await onJoin(displayName.trim()); } catch(err) { console.error('[join]', err); }
               setLoading(false);
             }
           }}
           autoFocus={existingMembers.length === 0}
         />
         <button className="modal-btn" disabled={!displayName.trim() || loading}
-          onClick={async () => { setLoading(true); await onJoin(displayName.trim()); setLoading(false); }}>
+          onClick={async () => {
+            setLoading(true);
+            try { await onJoin(displayName.trim()); } catch(err) { console.error('[join]', err); }
+            setLoading(false);
+          }}>
           {loading ? 'Joining…' : 'Join Group'}
         </button>
         <button className="modal-cancel" onClick={() => window.history.replaceState({}, '', window.location.pathname)}>Cancel</button>
@@ -1813,12 +1817,18 @@ function App() {
   const handleJoinGroup = async (displayName) => {
     if (!pendingGroup) return;
 
-    // Check if someone with this display name already exists in the group
-    const { data: existing } = await supabase.from('group_members')
-      .select('*')
-      .eq('group_id', pendingGroup.id)
-      .eq('display_name', displayName)
-      .maybeSingle();
+    // Check by session_id first (catches returning users even if they changed display name,
+    // and avoids a unique-constraint crash on re-join attempts).
+    const { data: bySession } = await supabase.from('group_members')
+      .select('*').eq('group_id', pendingGroup.id).eq('session_id', sessionId.current).maybeSingle();
+
+    // Also check by display_name in case a different device used the same name
+    const { data: byName } = !bySession
+      ? await supabase.from('group_members').select('*')
+          .eq('group_id', pendingGroup.id).eq('display_name', displayName).maybeSingle()
+      : { data: null };
+
+    const existing = bySession || byName;
 
     let mem;
     if (existing) {
@@ -1849,9 +1859,14 @@ function App() {
       }
     } else {
       // New member
-      const { data: newMem } = await supabase.from('group_members')
+      const { data: newMem, error: insertErr } = await supabase.from('group_members')
         .insert({ group_id: pendingGroup.id, session_id: sessionId.current, display_name: displayName })
         .select().single();
+      if (!newMem) {
+        console.error('[join insert]', insertErr);
+        showToast('Error joining group — please try again.');
+        return;
+      }
       mem = newMem;
       await saveGroupPicks(pendingGroup.id, newMem.id, picks);
       showToast(`Welcome to ${pendingGroup.name}!`);
