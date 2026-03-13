@@ -264,6 +264,13 @@
     .check-circle.green { background: #2d8a3e; }
     .check-circle.red   { background: #8a2d2d; }
     .check-circle svg { width: 13px; height: 13px; }
+    .dash-circle {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: #444;
+      display: flex; align-items: center; justify-content: center;
+      color: #aaa; font-size: 1rem; font-weight: 700; line-height: 1;
+    }
     .arrow-circle {
       width: 28px; height: 28px;
       border-radius: 50%;
@@ -1457,15 +1464,14 @@ function HomePage({ picks, winners, onSelect, onClearAll, currentGroup, groupMem
           const pick = picks[cat.id];
           const winner = winners[cat.id];
           const status = getCardStatus(cat.id);
-          const winnerNominee = winner ? cat.nominees.find(n => n.name === winner) : null;
           const freshPhoto = pick ? cat.nominees.find(n => n.name === pick.name)?.photo : null;
-          const thumbSrc = freshPhoto || winnerNominee?.photo || cat.nominees[0]?.photo || '';
+          const thumbSrc = freshPhoto || cat.nominees[0]?.photo || '';
           return (
             <div key={cat.id}
               className={`cat-card${status==='correct'?' correct':status==='wrong'?' wrong':status==='picked'?' picked':''}`}
               onClick={() => onSelect(cat.id)}>
               <div className="cat-icon">
-                <TrophyIcon color={pick ? '#D4A843' : winner ? '#D4A843' : '#555'}/>
+                <TrophyIcon color={pick ? '#D4A843' : '#555'}/>
                 {thumbSrc && <img src={proxyImg(thumbSrc)} alt={cat.name} onError={e => { e.target.style.display='none'; }}/>}
               </div>
               <div className="cat-body">
@@ -1487,6 +1493,8 @@ function HomePage({ picks, winners, onSelect, onClearAll, currentGroup, groupMem
                   <div className="check-circle red"><XIcon/></div>
                 ) : pick ? (
                   <div className="check-circle"><CheckIcon/></div>
+                ) : winner ? (
+                  <div className="dash-circle">–</div>
                 ) : (
                   <div className="arrow-circle"><ArrowRight/></div>
                 )}
