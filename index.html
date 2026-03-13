@@ -1501,9 +1501,10 @@ function App() {
   const [createdGroupName, setCreatedGroupName] = useState('');
   const [inviteUrl, setInviteUrl]         = useState('');
 
-  const sessionId      = useRef(getSessionId());
-  const saveTimeout    = useRef(null);
-  const currentGroupRef = useRef(currentGroup);
+  const sessionId        = useRef(getSessionId());
+  const saveTimeout      = useRef(null);
+  const groupSaveTimeout = useRef(null);
+  const currentGroupRef  = useRef(currentGroup);
   useEffect(() => { currentGroupRef.current = currentGroup; }, [currentGroup]);
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 2800); };
@@ -1524,6 +1525,15 @@ function App() {
               setGroupMember(mem);
               localStorage.setItem('goldticket_group', JSON.stringify(grp));
               localStorage.setItem('goldticket_member', JSON.stringify(mem));
+              // Always refresh picks from group_picks to get latest across all devices
+              supabase.from('group_picks').select('picks')
+                .eq('group_id', grp.id).eq('session_id', sessionId.current).maybeSingle()
+                .then(({ data: gp }) => {
+                  if (gp?.picks && Object.keys(gp.picks).length > 0) {
+                    setPicks(gp.picks);
+                    localStorage.setItem('goldticket_picks', JSON.stringify(gp.picks));
+                  }
+                });
             } else {
               setPendingGroup(grp);
               supabase.from('group_members').select('display_name').eq('group_id', grp.id).order('joined_at')
@@ -1535,14 +1545,31 @@ function App() {
   }, []);
 
   // ── Load picks from Supabase on mount ──
+  // If already in a group, prefer group_picks (canonical source across devices)
   useEffect(() => {
-    supabase.from('picks').select('picks').eq('session_id', sessionId.current).maybeSingle()
-      .then(({ data }) => {
-        if (data?.picks && Object.keys(data.picks).length > 0) {
-          setPicks(data.picks);
-          localStorage.setItem('goldticket_picks', JSON.stringify(data.picks));
-        }
-      });
+    const loadFromGlobal = () =>
+      supabase.from('picks').select('picks').eq('session_id', sessionId.current).maybeSingle()
+        .then(({ data }) => {
+          if (data?.picks && Object.keys(data.picks).length > 0) {
+            setPicks(data.picks);
+            localStorage.setItem('goldticket_picks', JSON.stringify(data.picks));
+          }
+        });
+
+    if (currentGroup) {
+      supabase.from('group_picks').select('picks')
+        .eq('group_id', currentGroup.id).eq('session_id', sessionId.current).maybeSingle()
+        .then(({ data: gp }) => {
+          if (gp?.picks && Object.keys(gp.picks).length > 0) {
+            setPicks(gp.picks);
+            localStorage.setItem('goldticket_picks', JSON.stringify(gp.picks));
+          } else {
+            loadFromGlobal();
+          }
+        });
+    } else {
+      loadFromGlobal();
+    }
   }, []);
 
   // ── Load winners on mount / group change ──
@@ -1554,12 +1581,13 @@ function App() {
     });
   }, [currentGroup?.id]);
 
-  // ── Sync picks to Supabase (debounced) ──
+  // ── Sync picks to Supabase ──
   useEffect(() => {
     localStorage.setItem('goldticket_picks', JSON.stringify(picks));
-    clearTimeout(saveTimeout.current);
-    saveTimeout.current = setTimeout(() => {
-      supabase.from('picks').upsert({ session_id: sessionId.current, picks, updated_at: new Date().toISOString() });
+
+    // Save to group_picks quickly so returning users always get latest
+    clearTimeout(groupSaveTimeout.current);
+    groupSaveTimeout.current = setTimeout(() => {
       if (currentGroupRef.current) {
         supabase.from('group_picks').upsert({
           group_id: currentGroupRef.current.id,
@@ -1568,6 +1596,12 @@ function App() {
           updated_at: new Date().toISOString(),
         });
       }
+    }, 200);
+
+    // Save to global picks table (longer debounce, less critical)
+    clearTimeout(saveTimeout.current);
+    saveTimeout.current = setTimeout(() => {
+      supabase.from('picks').upsert({ session_id: sessionId.current, picks, updated_at: new Date().toISOString() });
     }, 600);
   }, [picks]);
 
