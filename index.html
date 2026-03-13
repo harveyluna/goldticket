@@ -2235,7 +2235,7 @@ function App() {
     const CARD_PAD = 7;
     const CHECK    = 7;
     const CARD_GAP = 7;
-    const HDR_H    = 52;
+    const HDR_H    = 64;
 
     const BODY_TOP = MT + HDR_H + 8;
     const BODY_BOT = PH - MB - 14; // leave room for footer
@@ -2272,6 +2272,20 @@ function App() {
       // Divider
       doc.setFillColor(58, 48, 32);
       doc.rect(ML, MT + 38, PW - ML - MR, 0.75, 'F');
+      // Person / group info row
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      if (groupMember?.display_name) {
+        doc.setTextColor(...C_TEXT);
+        doc.text(groupMember.display_name, ML, MT + 50);
+      }
+      if (currentGroup?.name || currentGroup?.invite_code) {
+        const parts = [];
+        if (currentGroup.name) parts.push(currentGroup.name);
+        if (currentGroup.invite_code) parts.push(`Code: ${currentGroup.invite_code}`);
+        doc.setTextColor(...C_MUTED);
+        doc.text(parts.join('  ·  '), PW - MR, MT + 50, { align: 'right' });
+      }
     };
 
     const drawCard = (cat, x, y) => {
