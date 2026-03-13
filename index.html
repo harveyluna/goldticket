@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CultureBrackets – Oscar Predictions</title>
+  <link rel="icon" type="image/svg+xml" href="images/cb-icon.svg">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
@@ -113,6 +114,20 @@
       max-width: 480px;
       margin: 0 auto 32px;
       line-height: 1.6;
+    }
+
+    /* ── Hero banner ── */
+    .hero-banner { display: flex; align-items: center; justify-content: center; gap: 28px; margin-bottom: 20px; flex-wrap: wrap; }
+    .hero-logo { width: clamp(120px, 20vw, 190px); flex-shrink: 0; }
+    .hero-text { text-align: left; }
+    .hero-text .badge { justify-content: flex-start; }
+    .hero-text h1 { margin: 8px 0 10px; }
+    .hero-text .subtitle { margin: 0 0 0; max-width: 360px; }
+    @media (max-width: 520px) {
+      .hero-banner { gap: 14px; }
+      .hero-logo { width: clamp(100px, 38vw, 140px); }
+      .hero-text { text-align: center; }
+      .hero-text .badge { justify-content: center; }
     }
 
     /* ── Group section on home ── */
@@ -1412,9 +1427,14 @@ function HomePage({ picks, winners, onSelect, onClearAll, onExport, currentGroup
 
   return (
     <div className="home">
-      <div className="badge"><TrophyIcon color="#D4A843"/> 98TH ACADEMY AWARDS</div>
-      <h1>Oscar<br/>Predictions</h1>
-      <p className="subtitle">Pick as many categories as you like and see how you stack up on Hollywood's biggest night.</p>
+      <div className="hero-banner">
+        <img src="images/cb-logo.svg" className="hero-logo" alt="Culture Brackets"/>
+        <div className="hero-text">
+          <div className="badge"><TrophyIcon color="#D4A843"/> 98TH ACADEMY AWARDS</div>
+          <h1>Oscar<br/>Predictions</h1>
+          <p className="subtitle">Pick as many categories as you like and see how you stack up on Hollywood's biggest night.</p>
+        </div>
+      </div>
 
       {/* Group strip */}
       {!currentGroup ? (
