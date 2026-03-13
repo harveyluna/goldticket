@@ -1423,7 +1423,7 @@ function HomePage({ picks, winners, onSelect, onClearAll, currentGroup, groupMem
             <strong>{currentGroup.name}</strong>
             {groupMember && <span>as <strong>{groupMember.display_name}</strong></span>}
           </div>
-          <button className="group-strip-btn" onClick={onLeaveGroup}>Leave</button>
+          <button className="group-strip-btn" onClick={onLeaveGroup}>Log out</button>
         </div>
       )}
 
@@ -1602,7 +1602,7 @@ function LeaderboardPage({ members, groupPicksMap, winners, sessionId }) {
       <h2>Leaderboard</h2>
       <p className="page-sub">
         {winnersSet === 0
-          ? 'Scores will appear once winners are announced.'
+          ? 'Scores will be tabulated once Oscar winners are announced. The person with the most number of correct Oscar predictions wins.'
           : `${winnersSet} of ${totalCats} winners announced`}
       </p>
 
