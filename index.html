@@ -1324,7 +1324,7 @@ function CategoryPage({ categoryId, picks, winners, onPick, onBack }) {
   };
 
   return (
-    <div className="detail-page">
+    <div className="detail-page" onClick={e => { if (e.target === e.currentTarget) onBack(); }}>
       <button className="back-btn" onClick={onBack}><ArrowLeft/> Back to categories</button>
 
       <div className="detail-header">
