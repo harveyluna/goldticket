@@ -1636,44 +1636,51 @@ function App() {
       .maybeSingle();
 
     let mem;
-    if (existing && existing.session_id !== sessionId.current) {
-      // Same display name found — treat as returning user
-      // Load their existing group picks
+    if (existing) {
+      // Returning user — always load their stored picks
       const { data: gp } = await supabase.from('group_picks')
         .select('picks')
         .eq('group_id', pendingGroup.id)
         .eq('session_id', existing.session_id)
         .maybeSingle();
-      const restoredPicks = gp?.picks || null;
+      const restoredPicks = gp?.picks && Object.keys(gp.picks).length > 0 ? gp.picks : null;
 
-      // Re-point the member row to the current session
-      const { data: updatedMem } = await supabase.from('group_members')
-        .update({ session_id: sessionId.current })
-        .eq('id', existing.id)
-        .select().single();
-      mem = updatedMem || { ...existing, session_id: sessionId.current };
+      if (existing.session_id !== sessionId.current) {
+        // Different device/session — re-point member row and migrate picks
+        const { data: updatedMem } = await supabase.from('group_members')
+          .update({ session_id: sessionId.current })
+          .eq('id', existing.id)
+          .select().single();
+        mem = updatedMem || { ...existing, session_id: sessionId.current };
 
-      // Migrate picks from old session to new session
-      if (restoredPicks) {
         await supabase.from('group_picks')
           .delete()
           .eq('group_id', pendingGroup.id)
           .eq('session_id', existing.session_id);
         await supabase.from('group_picks').upsert({
           group_id: pendingGroup.id, session_id: sessionId.current,
-          picks: restoredPicks, updated_at: new Date().toISOString(),
+          picks: restoredPicks || picks, updated_at: new Date().toISOString(),
         });
+      } else {
+        // Same session — member row is unchanged; just ensure picks are written
+        mem = existing;
+        if (!restoredPicks) {
+          await supabase.from('group_picks').upsert({
+            group_id: pendingGroup.id, session_id: sessionId.current,
+            picks, updated_at: new Date().toISOString(),
+          });
+        }
+      }
+
+      if (restoredPicks) {
         setPicks(restoredPicks);
         localStorage.setItem('goldticket_picks', JSON.stringify(restoredPicks));
+        showToast(`Welcome back, ${displayName}! Your picks have been restored.`);
       } else {
-        await supabase.from('group_picks').upsert({
-          group_id: pendingGroup.id, session_id: sessionId.current,
-          picks, updated_at: new Date().toISOString(),
-        });
+        showToast(`Welcome back, ${displayName}!`);
       }
-      showToast(`Welcome back, ${displayName}! Your picks have been restored.`);
     } else {
-      // New member (or same session rejoining)
+      // New member
       const { data: newMem } = await supabase.from('group_members')
         .upsert({ group_id: pendingGroup.id, session_id: sessionId.current, display_name: displayName },
                  { onConflict: 'group_id,session_id' })
