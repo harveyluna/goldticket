@@ -2008,7 +2008,6 @@ function App() {
         .select('display_name').eq('group_id', grp.id).order('joined_at');
       setPendingGroup(grp);
       setPendingGroupMembers(mems?.map(m => m.display_name) || []);
-      setDisplayName('');
       setModal('join');
     } catch (err) {
       console.error('[entercode]', err);
@@ -2093,7 +2092,7 @@ function App() {
       )}
       {content}
       {modal && (
-        <GroupModal mode={modal}
+        <GroupModal key={modal} mode={modal}
           groupName={modal === 'join' ? pendingGroup?.name : createdGroupName}
           inviteUrl={inviteUrl}
           existingMembers={pendingGroupMembers}
