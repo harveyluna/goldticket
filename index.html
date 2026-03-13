@@ -1712,6 +1712,23 @@ function App() {
     }
   }, []);
 
+  // ── Keep group_members.session_id in sync with current session ──
+  // If a previous incognito visit pointed group_members to a different session,
+  // re-point it to the current session and save the current picks under it.
+  // This ensures the next incognito restore always finds the freshest picks.
+  useEffect(() => {
+    if (!currentGroup || !groupMember) return;
+    (async () => {
+      const { data: memRow } = await supabase
+        .from('group_members').select('session_id').eq('id', groupMember.id).maybeSingle();
+      if (memRow && memRow.session_id !== sessionId.current) {
+        await supabase.from('group_members')
+          .update({ session_id: sessionId.current }).eq('id', groupMember.id);
+        await saveGroupPicks(currentGroup.id, sessionId.current, picksRef.current);
+      }
+    })();
+  }, [currentGroup?.id]);
+
   // ── Load winners on mount / group change ──
   useEffect(() => {
     supabase.from('winners').select('*').then(({ data }) => {
