@@ -185,6 +185,20 @@
     .ring-center .big { font-size: 2rem; font-weight: 700; color: #f0e8d5; }
     .ring-center .of  { font-size: 0.72rem; color: #666; }
     .progress-card .remain { color: #888; font-size: 0.9rem; }
+    .clear-btn {
+      background: none;
+      border: none;
+      color: #555;
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+      font-family: inherit;
+      margin-top: 2px;
+    }
+    .clear-btn:hover { color: #aaa; background: #222; }
+    .clear-btn.confirm { color: #e05252; }
 
     /* ── Grid ── */
     .categories-grid {
@@ -1219,10 +1233,23 @@ function GroupNav({ group, tab, isAdmin, onTabChange, onInvite }) {
 /* ─────────────────────────────────────────────
    HOME PAGE
 ───────────────────────────────────────────── */
-function HomePage({ picks, winners, onSelect, currentGroup, groupMember, onCreateGroup, onLeaveGroup }) {
+function HomePage({ picks, winners, onSelect, onClearAll, currentGroup, groupMember, onCreateGroup, onLeaveGroup }) {
   const total = CATEGORIES.length;
   const done  = Object.keys(picks).length;
   const remaining = total - done;
+  const [confirmClear, setConfirmClear] = React.useState(false);
+  const confirmTimer = React.useRef(null);
+
+  const handleClear = () => {
+    if (!confirmClear) {
+      setConfirmClear(true);
+      confirmTimer.current = setTimeout(() => setConfirmClear(false), 3000);
+    } else {
+      clearTimeout(confirmTimer.current);
+      setConfirmClear(false);
+      onClearAll();
+    }
+  };
 
   const getCardStatus = (catId) => {
     const pick = picks[catId];
@@ -1261,6 +1288,11 @@ function HomePage({ picks, winners, onSelect, currentGroup, groupMember, onCreat
         <span className="remain muted">
           {done === 0 ? 'No picks yet' : done === total ? "🎉 All categories picked! You're a movie buff, aren't ya?" : `${done} of ${total} categories picked`}
         </span>
+        {done > 0 && (
+          <button className={`clear-btn${confirmClear ? ' confirm' : ''}`} onClick={handleClear}>
+            {confirmClear ? 'Tap again to confirm' : 'Clear all selections'}
+          </button>
+        )}
       </div>
 
       <div className="categories-grid">
@@ -1806,6 +1838,7 @@ function App() {
     content = <CategoryPage categoryId={activeCat} picks={picks} winners={winners} onPick={handlePick} onBack={() => setActiveCat(null)}/>;
   } else {
     content = <HomePage picks={picks} winners={winners} onSelect={setActiveCat}
+      onClearAll={() => setPicks({})}
       currentGroup={currentGroup} groupMember={groupMember}
       onCreateGroup={() => setModal('create')} onLeaveGroup={handleLeaveGroup}/>;
   }
