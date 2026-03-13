@@ -1447,88 +1447,25 @@ const initials = (name) => {
     : name.replace(/['"]/g, '').slice(0, 2).toUpperCase();
 };
 
-function ShareSheet({ pdfBlob, inviteCode, onClose }) {
+function ShareSheet({ pdfBlob, onClose }) {
   const pdfUrl = React.useMemo(() => pdfBlob ? URL.createObjectURL(pdfBlob) : null, [pdfBlob]);
   React.useEffect(() => () => { if (pdfUrl) URL.revokeObjectURL(pdfUrl); }, [pdfUrl]);
-
-  const getPdfFile = () => new File([pdfBlob], 'culture-brackets-ballot.pdf', { type: 'application/pdf' });
 
   const download = () => {
     const a = document.createElement('a');
     a.href = pdfUrl; a.download = 'culture-brackets-ballot.pdf'; a.click();
   };
 
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-  // Helper: share file via native share sheet (mobile only)
-  const shareFileNative = async () => {
-    const file = getPdfFile();
-    await navigator.share({ files: [file], title: 'My 2026 Oscar Ballot' });
-  };
-
-  // Mail — desktop: download PDF then open email client; mobile: native share sheet
-  const email = () => {
-    if (isMobile && navigator.share && navigator.canShare && navigator.canShare({ files: [getPdfFile()] })) {
-      shareFileNative().catch(e => { if (e.name !== 'AbortError') window.location.href = 'mailto:?subject=My%202026%20Oscar%20Ballot'; });
-    } else {
-      download();
-      setTimeout(() => { window.location.href = 'mailto:?subject=My%202026%20Oscar%20Ballot&body=See%20attached%20PDF%20for%20my%202026%20Academy%20Awards%20picks!'; }, 400);
-    }
-  };
-
-  // Message — desktop: open sms: (no file possible); mobile: native share sheet with file
-  const message = () => {
-    if (isMobile && navigator.share && navigator.canShare && navigator.canShare({ files: [getPdfFile()] })) {
-      shareFileNative().catch(e => { if (e.name !== 'AbortError') window.location.href = 'sms:?body=Check%20out%20my%202026%20Oscar%20Ballot%20on%20Culture%20Brackets!'; });
-    } else {
-      window.location.href = 'sms:?body=Check%20out%20my%202026%20Oscar%20Ballot%20on%20Culture%20Brackets!';
-    }
-  };
-
-  const [inviteCopied, setInviteCopied] = React.useState(false);
-  const copyInvite = async () => {
-    const base = window.location.origin + window.location.pathname;
-    const url = inviteCode ? `${base}?group=${inviteCode}` : base;
-    try {
-      await navigator.clipboard.writeText(url);
-      setInviteCopied(true);
-      setTimeout(() => setInviteCopied(false), 2000);
-    } catch { alert('Could not copy invite link.'); }
-  };
-
-  // More — native share sheet with file if supported, otherwise just download
-  const nativeShare = () => {
-    if (navigator.share && navigator.canShare && navigator.canShare({ files: [getPdfFile()] })) {
-      shareFileNative().catch(e => { if (e.name !== 'AbortError') download(); });
+  const share = () => {
+    const file = new File([pdfBlob], 'culture-brackets-ballot.pdf', { type: 'application/pdf' });
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file], title: 'My 2026 Oscar Ballot' }).catch(e => { if (e.name !== 'AbortError') download(); });
     } else if (navigator.share) {
       navigator.share({ title: 'My 2026 Oscar Ballot', url: window.location.href }).catch(() => {});
     } else {
       download();
     }
   };
-
-  const actions = [
-    {
-      label: 'Download', fn: download,
-      icon: <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-    },
-    {
-      label: 'Mail', fn: email,
-      icon: <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
-    },
-    {
-      label: 'Message', fn: message,
-      icon: <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-    },
-    {
-      label: inviteCopied ? 'Copied!' : 'Invite', fn: copyInvite,
-      icon: <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-    },
-    {
-      label: 'More', fn: nativeShare,
-      icon: <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
-    },
-  ];
 
   return (
     <div className="share-overlay" onClick={onClose}>
@@ -1542,12 +1479,18 @@ function ShareSheet({ pdfBlob, inviteCode, onClose }) {
           }
         </div>
         <div className="share-actions">
-          {actions.map(a => (
-            <button key={a.label} className="share-action-btn" onClick={a.fn}>
-              <span className="share-action-icon">{a.icon}</span>
-              {a.label}
-            </button>
-          ))}
+          <button className="share-action-btn" onClick={download}>
+            <span className="share-action-icon">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </span>
+            Download
+          </button>
+          <button className="share-action-btn" onClick={share}>
+            <span className="share-action-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" fill="currentColor"><path d="M 35.478516 5.9804688 A 2.0002 2.0002 0 0 0 34.085938 9.4140625 L 35.179688 10.507812 C 23.476587 10.680668 14 20.256715 14 32 A 2.0002 2.0002 0 1 0 18 32 C 18 22.427546 25.627423 14.702715 35.154297 14.517578 L 34.085938 15.585938 A 2.0002 2.0002 0 1 0 36.914062 18.414062 L 41.236328 14.091797 A 2.0002 2.0002 0 0 0 41.228516 10.900391 L 36.914062 6.5859375 A 2.0002 2.0002 0 0 0 35.478516 5.9804688 z M 12.5 6 C 8.9338464 6 6 8.9338464 6 12.5 L 6 35.5 C 6 39.066154 8.9338464 42 12.5 42 L 35.5 42 C 39.066154 42 42 39.066154 42 35.5 L 42 28 A 2.0002 2.0002 0 1 0 38 28 L 38 35.5 C 38 36.903846 36.903846 38 35.5 38 L 12.5 38 C 11.096154 38 10 36.903846 10 35.5 L 10 12.5 C 10 11.096154 11.096154 10 12.5 10 L 20 10 A 2.0002 2.0002 0 1 0 20 6 L 12.5 6 z"/></svg>
+            </span>
+            Share
+          </button>
         </div>
         <hr className="share-divider"/>
         <button className="share-cancel" onClick={onClose}>Cancel</button>
@@ -2529,7 +2472,7 @@ function App() {
           onJoin={handleJoinGroup}
           defaultCode={modal === 'entercode' ? (localStorage.getItem('goldticket_last_code') || '') : ''}/>
       )}
-      {shareBlob && <ShareSheet pdfBlob={shareBlob} inviteCode={currentGroup?.invite_code} onClose={() => setShareBlob(null)}/>}
+      {shareBlob && <ShareSheet pdfBlob={shareBlob} onClose={() => setShareBlob(null)}/>}
       <Toast msg={toast}/>
     </>
   );
