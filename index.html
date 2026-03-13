@@ -1567,14 +1567,64 @@ function App() {
 
   const handleJoinGroup = async (displayName) => {
     if (!pendingGroup) return;
-    const { data: mem } = await supabase.from('group_members')
-      .upsert({ group_id: pendingGroup.id, session_id: sessionId.current, display_name: displayName },
-               { onConflict: 'group_id,session_id' })
-      .select().single();
 
-    await supabase.from('group_picks').upsert({
-      group_id: pendingGroup.id, session_id: sessionId.current, picks, updated_at: new Date().toISOString(),
-    });
+    // Check if someone with this display name already exists in the group
+    const { data: existing } = await supabase.from('group_members')
+      .select('*')
+      .eq('group_id', pendingGroup.id)
+      .eq('display_name', displayName)
+      .maybeSingle();
+
+    let mem;
+    if (existing && existing.session_id !== sessionId.current) {
+      // Same display name found — treat as returning user
+      // Load their existing group picks
+      const { data: gp } = await supabase.from('group_picks')
+        .select('picks')
+        .eq('group_id', pendingGroup.id)
+        .eq('session_id', existing.session_id)
+        .maybeSingle();
+      const restoredPicks = gp?.picks || null;
+
+      // Re-point the member row to the current session
+      const { data: updatedMem } = await supabase.from('group_members')
+        .update({ session_id: sessionId.current })
+        .eq('id', existing.id)
+        .select().single();
+      mem = updatedMem || { ...existing, session_id: sessionId.current };
+
+      // Migrate picks from old session to new session
+      if (restoredPicks) {
+        await supabase.from('group_picks')
+          .delete()
+          .eq('group_id', pendingGroup.id)
+          .eq('session_id', existing.session_id);
+        await supabase.from('group_picks').upsert({
+          group_id: pendingGroup.id, session_id: sessionId.current,
+          picks: restoredPicks, updated_at: new Date().toISOString(),
+        });
+        setPicks(restoredPicks);
+        localStorage.setItem('goldticket_picks', JSON.stringify(restoredPicks));
+      } else {
+        await supabase.from('group_picks').upsert({
+          group_id: pendingGroup.id, session_id: sessionId.current,
+          picks, updated_at: new Date().toISOString(),
+        });
+      }
+      showToast(`Welcome back, ${displayName}! Your picks have been restored.`);
+    } else {
+      // New member (or same session rejoining)
+      const { data: newMem } = await supabase.from('group_members')
+        .upsert({ group_id: pendingGroup.id, session_id: sessionId.current, display_name: displayName },
+                 { onConflict: 'group_id,session_id' })
+        .select().single();
+      mem = newMem;
+      await supabase.from('group_picks').upsert({
+        group_id: pendingGroup.id, session_id: sessionId.current,
+        picks, updated_at: new Date().toISOString(),
+      });
+      showToast(`Welcome to ${pendingGroup.name}!`);
+    }
 
     setCurrentGroup(pendingGroup);
     setGroupMember(mem);
@@ -1582,7 +1632,6 @@ function App() {
     localStorage.setItem('goldticket_member', JSON.stringify(mem));
     setPendingGroup(null);
     setModal(null);
-    showToast(`Welcome to ${pendingGroup.name}!`);
   };
 
   const handleLeaveGroup = () => {
