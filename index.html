@@ -1877,18 +1877,22 @@ function App() {
 
   const handleCreateGroup = async (groupName, displayName) => {
     const { data: grp, error } = await supabase
-      .from('groups').insert({ name: groupName, created_by: sessionId.current }).select().single();
+      .from('groups').insert({ name: groupName, created_by: '' }).select().single();
     if (error || !grp) { showToast('Error creating group.'); return; }
 
     const { data: mem } = await supabase.from('group_members')
       .insert({ group_id: grp.id, session_id: sessionId.current, display_name: displayName })
       .select().single();
 
+    // Store creator's member ID so admin is tied to the member record, not session
+    await supabase.from('groups').update({ created_by: mem.id }).eq('id', grp.id);
+    const updatedGrp = { ...grp, created_by: mem.id };
+
     await saveGroupPicks(grp.id, mem.id, picks);
 
-    setCurrentGroup(grp);
+    setCurrentGroup(updatedGrp);
     setGroupMember(mem);
-    localStorage.setItem('goldticket_group', JSON.stringify(grp));
+    localStorage.setItem('goldticket_group', JSON.stringify(updatedGrp));
     localStorage.setItem('goldticket_member', JSON.stringify(mem));
 
     const base = window.location.origin + window.location.pathname;
@@ -2039,7 +2043,8 @@ function App() {
     if (tab !== 'picks') loadGroupData();
   };
 
-  const isAdmin = currentGroup && currentGroup.created_by === sessionId.current;
+  // Admin = whoever joined first; cascades to next member if they leave
+  const isAdmin = groupMember && groupMembers.length > 0 && groupMembers[0].id === groupMember.id;
 
   // ── Render ──
   let content;
