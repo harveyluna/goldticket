@@ -1933,13 +1933,15 @@ function App() {
       const restoredPicks = await fetchGroupPicks(pendingGroup.id, existing.id)
         || await fetchGlobalPicks(existing.session_id);
 
-      // Update session_id so the leaderboard "you" badge highlights correctly
-      if (existing.session_id !== sessionId.current) {
+      // Update session_id and/or display_name if either changed
+      const needsUpdate = existing.session_id !== sessionId.current || existing.display_name !== displayName;
+      if (needsUpdate) {
+        const updates = { session_id: sessionId.current, display_name: displayName };
         const { data: updatedMem } = await supabase.from('group_members')
-          .update({ session_id: sessionId.current })
+          .update(updates)
           .eq('id', existing.id)
           .select().single();
-        mem = updatedMem || { ...existing, session_id: sessionId.current };
+        mem = updatedMem || { ...existing, ...updates };
       } else {
         mem = existing;
       }
