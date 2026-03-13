@@ -708,41 +708,48 @@ const supabase = window.supabase.createClient(
 // constraint; without it, every upsert inserts a new row, making reads fail).
 
 async function saveGroupPicks(groupId, sid, picksData) {
-  // Try update first; if nothing matched, insert.
-  const { data: updated } = await supabase.from('group_picks')
-    .update({ picks: picksData, updated_at: new Date().toISOString() })
+  // Try update first; if nothing matched (empty data), insert.
+  // Do NOT include updated_at — it may not exist in the schema.
+  const { data: updated, error: ue } = await supabase.from('group_picks')
+    .update({ picks: picksData })
     .eq('group_id', groupId).eq('session_id', sid)
     .select('group_id');
+  if (ue) console.error('[saveGroupPicks] update error', ue);
   if (!updated || updated.length === 0) {
-    await supabase.from('group_picks')
-      .insert({ group_id: groupId, session_id: sid, picks: picksData, updated_at: new Date().toISOString() });
+    const { error: ie } = await supabase.from('group_picks')
+      .insert({ group_id: groupId, session_id: sid, picks: picksData });
+    if (ie) console.error('[saveGroupPicks] insert error', ie);
   }
 }
 
 async function saveGlobalPicks(sid, picksData) {
-  const { data: updated } = await supabase.from('picks')
-    .update({ picks: picksData, updated_at: new Date().toISOString() })
+  const { data: updated, error: ue } = await supabase.from('picks')
+    .update({ picks: picksData })
     .eq('session_id', sid)
     .select('session_id');
+  if (ue) console.error('[saveGlobalPicks] update error', ue);
   if (!updated || updated.length === 0) {
-    await supabase.from('picks')
-      .insert({ session_id: sid, picks: picksData, updated_at: new Date().toISOString() });
+    const { error: ie } = await supabase.from('picks')
+      .insert({ session_id: sid, picks: picksData });
+    if (ie) console.error('[saveGlobalPicks] insert error', ie);
   }
 }
 
-// Safe read: returns the most recent picks regardless of duplicate rows.
+// Safe reads: no updated_at ordering — just take the first matching row.
 async function fetchGroupPicks(groupId, sid) {
-  const { data } = await supabase.from('group_picks')
+  const { data, error } = await supabase.from('group_picks')
     .select('picks').eq('group_id', groupId).eq('session_id', sid)
-    .order('updated_at', { ascending: false }).limit(1);
+    .limit(1);
+  if (error) console.error('[fetchGroupPicks] error', error);
   const p = data?.[0]?.picks;
   return p && Object.keys(p).length > 0 ? p : null;
 }
 
 async function fetchGlobalPicks(sid) {
-  const { data } = await supabase.from('picks')
+  const { data, error } = await supabase.from('picks')
     .select('picks').eq('session_id', sid)
-    .order('updated_at', { ascending: false }).limit(1);
+    .limit(1);
+  if (error) console.error('[fetchGlobalPicks] error', error);
   const p = data?.[0]?.picks;
   return p && Object.keys(p).length > 0 ? p : null;
 }
@@ -1808,8 +1815,9 @@ function App() {
 
     let mem;
     if (existing) {
-      // Returning user — load their most recent stored picks (safe even with duplicate rows)
-      const restoredPicks = await fetchGroupPicks(pendingGroup.id, existing.session_id);
+      // Returning user — try group_picks first, then fall back to global picks table
+      const restoredPicks = await fetchGroupPicks(pendingGroup.id, existing.session_id)
+        || await fetchGlobalPicks(existing.session_id);
 
       if (existing.session_id !== sessionId.current) {
         // Different device/session — re-point member row and migrate picks
